@@ -4,11 +4,11 @@ import Auth from './Auth';
 import AuthDev from './AuthDev';
 import AuthProd from './AuthProd';
 import { LoggerInterface } from '../logging';
-
-import types from '../../constants/types';
-import { config } from '../../config';
 import * as Exceptions from '../../interfaces/rest/exceptions/ApiExceptions';
 import * as Errors from '../../interfaces/rest/errors/ApiErrors';
+import { Environment } from '../environment/Environment';
+
+import types from '../../constants/types';
 
 class AuthFactory {
   constructor(
@@ -16,6 +16,8 @@ class AuthFactory {
   ) { }
 
   create(): Auth {
+    const config = this.context.container.get<Environment>(types.Environment);
+
     const auth: Auth = (config.isDevelopment || config.isTesting) && config.auth.enableMock
       ? this.context.container.get<AuthDev>(types.AuthDev)
       : this.context.container.get<AuthProd>(types.AuthProd);
@@ -39,10 +41,12 @@ class AuthFactory {
       'refreshToken',
       'inviteUser',
       'createUser',
+      'recreateUser',
       'updateUserData',
       'updateUserStatus',
       'changeUserPassword',
       'getUser',
+      'getInfoUser',
       'putUser'
     ];
 

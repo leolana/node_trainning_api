@@ -15,6 +15,7 @@ const TYPES = {
   FileStorageFactory: Symbol.for('Factory<FileStorage>'),
   FileStorageDev: Symbol.for('FileStorageDev'),
   FileStorageAWS: Symbol.for('FileStorageAWS'),
+  Environment: Symbol.for('Environment'),
   AuthDev: Symbol.for('AuthDev'),
   AuthProd: Symbol.for('AuthProd'),
   AuthFactory: Symbol.for('Factory<Auth>'),

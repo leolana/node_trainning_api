@@ -8,33 +8,34 @@ import credenciamentoStatusEnum from '../../../domain/entities/credenciamentoSta
 import { SiscofConnector } from '../../../infra/siscof';
 import Auth from '../../../infra/auth/Auth';
 import { Mailer } from '../../../infra/mailer';
-import { config } from '../../../config';
+import { Environment, AppEnv } from '../../../infra/environment/Environment';
 
 import types from '../../../constants/types';
 import { HealthCheckUseCases, getHealthCheckUseCases } from '../../../domain/usecases/healthCheck';
 
 @injectable()
 class HealthController implements Controller {
-  db: Sequelize;
   siscof: SiscofConnector;
   auth: Auth;
   statusCredenciamento: any;
   mailer: Mailer;
   emailTemplates: any;
+  settings: AppEnv;
   usecases: HealthCheckUseCases;
 
   constructor(
-    @inject(types.Database) db: Sequelize,
+    @inject(types.Database) private db: Sequelize,
     @inject(types.SiscofConnectorFactory) siscof: () => SiscofConnector,
     @inject(types.AuthFactory) auth: () => Auth,
     @inject(types.MailerFactory) mailer: () => Mailer,
+    @inject(types.Environment) config: Environment,
   ) {
-    this.db = db;
     this.siscof = siscof();
     this.auth = auth();
     this.statusCredenciamento = credenciamentoStatusEnum;
     this.mailer = mailer();
     this.emailTemplates = this.mailer.emailTemplates;
+    this.settings = config.app;
     this.usecases = getHealthCheckUseCases(db, siscof(), auth());
   }
 
@@ -42,6 +43,7 @@ class HealthController implements Controller {
     const router = Router();
 
     router.get('/health-check', this.healthCheck);
+    router.post('/health-kc', this.healthKc);
     router.get('/health/testPostgresConnection', this.testPostgresConnection);
     router.get('/health/testOracleConnection', this.testOracleConnection);
     router.get('/health/testKeyCloakAccess', this.testKeyCloakAccess);
@@ -76,8 +78,18 @@ class HealthController implements Controller {
 
       res.send({
         status: 'Api is running...',
-        result: true
+        result: true,
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  healthKc = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const healthKc = this.auth.addRoleKc(req.body.email, req.body.roles, req.body.pwd);
+
+      res.send(healthKc);
     } catch (error) {
       next(error);
     }
@@ -183,7 +195,7 @@ class HealthController implements Controller {
   }
 
   getVersion = async (req: Request, res: Response, next: NextFunction) => {
-    res.send({ result: config.app.version });
+    res.send({ result: this.settings.version });
   }
 
   getMigrations = async (req: Request, res: Response, next: NextFunction) => {

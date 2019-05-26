@@ -342,16 +342,18 @@ const editAnalyze = (db, fileStorage) => (
         credenciamento.arquivos.analises = unchangedFiles.analises;
       }
 
-      unchangedFiles.forEach((f) => {
-        if (f.id.startsWith('extrato')) {
-          // ignorar
-        } else if (!(
-          f.id.startsWith('analise')
-          || f.id in credenciamento.arquivos
-        )) {
-          credenciamento.arquivos[f.id] = f.arquivo;
-        }
-      });
+      if (Array.isArray(unchangedFiles)) {
+        unchangedFiles.forEach((f) => {
+          if (f.id.startsWith('extrato')) {
+            // ignorar
+          } else if (!(
+            f.id.startsWith('analise')
+            || f.id in credenciamento.arquivos
+          )) {
+            credenciamento.arquivos[f.id] = f.arquivo;
+          }
+        });
+      }
     }
 
     return credenciamento;

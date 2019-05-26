@@ -1,74 +1,62 @@
+import { ParticipanteNotFoundException } from '../../../interfaces/rest/exceptions/ApiExceptions';
 
-const getProviderNomineesUseCase = db => (idEstabelecimento) => {
+const getProviderNomineesUseCase = db => async (idEstabelecimento) => {
   const data: any = {};
-  const getParticipant = () => {
-    return db.entities.participanteEstabelecimento
-      .findOne({
-        attributes: ['participanteId'],
-        include: [{
-          as: 'participante',
-          model: db.entities.participante,
-          attributes: ['id', 'documento', 'ativo'],
-        }],
-      })
-      .then((arr) => {
-        if (!arr) throw new Error('participante-nao-encontrado');
-        data.participante = arr.participante;
-        return data;
-      });
-  };
-
-  const getNominees = () => {
-    return db.entities.participanteIndicacao.findAll({
-      where: { participanteId: idEstabelecimento },
+  const participanteEstabelecimento = await db.entities.participanteEstabelecimento
+    .findOne({
+      attributes: ['participanteId'],
       include: [{
-        model: db.entities.motivoTipoRecusa,
-        include: [{
-          model: db.entities.motivoRecusa,
-          as: 'motivoRecusa',
-          attributes: ['id', 'descricao', 'requerObservacao'],
-          where: { ativo: true },
-        }],
+        as: 'participante',
+        model: db.entities.participante,
+        attributes: ['id', 'documento', 'ativo'],
       }],
-    })
-      .then((arr) => {
-        data.indicacoes = arr;
-      });
-  };
-
-  const mapNominees = () => {
-    data.indicacoes.forEach((i) => {
-      if (i.motivoTipoRecusa
-        && i.motivoTipoRecusa.motivoRecusa
-        && !i.motivoTipoRecusa.motivoRecusa.requerObservacao) {
-        i.motivo = i.motivoTipoRecusa.motivoRecusa.descricao;
-      }
     });
 
-    const dados = data.indicacoes.map(i => ({
-      id: i.id,
-      dataCadastro: i.createdAt,
-      status: i.status,
-      documento: i.documento,
-      participante: {
-        id: data.participante.id,
-        documento: data.participante.documento,
-      },
-      contato: {
-        nome: i.nome,
-        email: i.email,
-        telefone: i.telefone,
-      },
-      motivoCancelamento: i.motivo,
-      dataCancelamento: (i.motivoTipoRecusa && i.motivoTipoRecusa.motivoRecusa)
-        ? i.dataFimIndicacao : null,
-    }));
-    return dados;
-  };
+  if (!participanteEstabelecimento) throw new ParticipanteNotFoundException();
+  data.participante = participanteEstabelecimento.participante;
 
-  return getParticipant()
-    .then(getNominees)
-    .then(mapNominees);
+  const participanteIndicacao = await db.entities.participanteIndicacao.findAll({
+    where: { participanteId: idEstabelecimento },
+    include: [{
+      model: db.entities.motivoTipoRecusa,
+      include: [{
+        model: db.entities.motivoRecusa,
+        as: 'motivoRecusa',
+        attributes: ['id', 'descricao', 'requerObservacao'],
+        where: { ativo: true },
+      }],
+    }],
+  });
+
+  data.indicacoes = participanteIndicacao;
+
+  data.indicacoes.forEach((indicacao) => {
+    if (indicacao.motivoTipoRecusa
+      && indicacao.motivoTipoRecusa.motivoRecusa
+      && !indicacao.motivoTipoRecusa.motivoRecusa.requerObservacao) {
+      indicacao.motivo = indicacao.motivoTipoRecusa.motivoRecusa.descricao;
+    }
+  });
+
+  return data.indicacoes.map(indicacao => ({
+    id: indicacao.id,
+    dataCadastro: indicacao.createdAt,
+    status: indicacao.status,
+    documento: indicacao.documento,
+    participante: {
+      id: data.participante.id,
+      documento: data.participante.documento,
+    },
+    contato: {
+      nome: indicacao.nome,
+      email: indicacao.email,
+      telefone: indicacao.telefone,
+    },
+    motivoCancelamento: indicacao.motivo,
+    dataCancelamento: (indicacao.motivoTipoRecusa && indicacao.motivoTipoRecusa.motivoRecusa)
+      ? indicacao.dataFimIndicacao : null,
+  }));
+
 };
 
 export default getProviderNomineesUseCase;

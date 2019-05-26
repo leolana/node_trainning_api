@@ -17,7 +17,7 @@ const participanteIndicacaoModel = (sequelize: Sequelize, dataTypes: DataTypes) 
         type: dataTypes.INTEGER,
         allowNull: false,
         validate: {
-          isIn: [<any[]>Object.values(personTypeEnum)],
+          isIn: [Object.values(personTypeEnum)],
         }
       },
       documento: {
@@ -40,7 +40,7 @@ const participanteIndicacaoModel = (sequelize: Sequelize, dataTypes: DataTypes) 
         type: dataTypes.INTEGER,
         allowNull: false,
         validate: {
-          isIn: [<any[]>Object.values(participateNominationSourceEnum)]
+          isIn: [Object.values(participateNominationSourceEnum)]
         }
       },
       usuario: {
@@ -52,7 +52,7 @@ const participanteIndicacaoModel = (sequelize: Sequelize, dataTypes: DataTypes) 
         allowNull: false,
         defaultValue: participanteIndicacaoStatus.pendente,
         validate: {
-          isIn: [<any[]>Object.values(participanteIndicacaoStatus)]
+          isIn: [Object.values(participanteIndicacaoStatus)]
         }
       },
       usuarioResposta: {

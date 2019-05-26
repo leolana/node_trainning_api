@@ -182,7 +182,7 @@ const credenciamentoModel = (sequelize: Sequelize, dataTypes: DataTypes) => {
         allowNull: false,
         defaultValue: credenciamentoStatusEnum.pendente,
         validate: {
-          isIn: [<any[]>Object.values(credenciamentoStatusEnum)],
+          isIn: [Object.values(credenciamentoStatusEnum)],
         },
       },
       ativo: {

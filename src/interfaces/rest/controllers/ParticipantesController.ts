@@ -3,7 +3,6 @@ import { Router, Response, NextFunction } from 'express';
 import { Request } from 'express-request';
 import { injectable, inject } from 'inversify';
 import { Sequelize } from 'sequelize-database';
-import { DateTime } from 'luxon';
 
 import Controller from '../Controller';
 import { LoggerInterface } from '../../../infra/logging';
@@ -17,66 +16,60 @@ import { SiscofWrapper } from '../../../infra/siscof';
 import { rolesEnum as roles } from '../../../domain/services/auth/rolesEnum';
 import participanteVinculoStatus from '../../../domain/entities/participanteVinculoStatus';
 import VinculoService from '../../../domain/services/VinculoService';
-import searchEcNominationUseCase from '../../../domain/usecases/participante/searchEcNominationUseCase';
-import personTypeEnum from '../../../domain/services/participante/personTypeEnum';
-import participateNominationSourceEnum from '../../../domain/entities/participateNominationSourceEnum';
 import rejectNominationService from '../../../domain/services/participante/rejectNominationService';
-import participante from '../../../domain/usecases/participante';
-import formatDocumento from '../../../domain/services/participante/formatDocumento';
 import getProviderLinksUseCase from '../../../domain/usecases/vinculo/getProviderLinksUseCase';
 import getProviderNominationUseCase from '../../../domain/usecases/vinculo/getProviderNominationUseCase';
 import getProviderRequestedLinksUsecase from '../../../domain/usecases/vinculo/getProviderRequestedLinksUsecase';
 import linkStatusEnum from '../../../domain/services/vinculo/linkStatusEnum';
-import types from '../../../constants/types';
-import { config } from '../../../config';
 import { IncludeOptions } from 'sequelize';
 import participanteIndicacaoStatus from '../../../domain/entities/participanteIndicacaoStatus';
-import { FornecedorLinked, EstabelecimentoLinked, VinculoNotFound } from '../exceptions/ApiExceptions';
+import { Environment, MailerEnv } from '../../../infra/environment/Environment';
+import { ParticipantesUseCases, getParticipantesUseCases } from '../../../domain/usecases/participante';
+
+import types from '../../../constants/types';
 
 @injectable()
 class ParticipantesController implements Controller {
-  db: Sequelize;
-  logger: LoggerInterface;
   auth: Auth;
   fileStorage: FileStorage;
-  siscofWrapper: SiscofWrapper;
   mailer: Mailer;
-  mailerSettings: any;
+  mailerSettings: MailerEnv;
   fetchFile: (type: any, index: any, document: any, id: any) => Promise<any>;
   emailTemplates: any;
-  vinculoService: VinculoService;
   indicacoesEc: (options: any) => Promise<any>;
-  useCasesParticipante: any;
+  useCasesParticipante: ParticipantesUseCases;
   reprovarIndicacaoService: (participanteId: any, motivoTipoRecusaId: any, motivo: any, usuario: any) => any;
 
   constructor(
-    @inject(types.Database) db: Sequelize,
-    @inject(types.Logger) logger: LoggerInterface,
+    @inject(types.Database) private db: Sequelize,
+    @inject(types.Logger) private logger: LoggerInterface,
     @inject(types.AuthFactory) auth: () => Auth,
     @inject(types.FileStorageFactory) fileStorage: () => FileStorage,
-    @inject(types.SiscofWrapper) siscofWrapper: SiscofWrapper,
+    @inject(types.SiscofWrapper) private siscofWrapper: SiscofWrapper,
     @inject(types.MailerFactory) mailer: () => Mailer,
-    @inject(types.VinculoService) vinculoService: VinculoService,
+    @inject(types.VinculoService) private vinculoService: VinculoService,
+    @inject(types.Environment) private config: Environment,
   ) {
-    this.db = db;
-    this.logger = logger;
     this.auth = auth();
     this.fileStorage = fileStorage();
-    this.siscofWrapper = siscofWrapper;
     this.mailer = mailer();
     this.emailTemplates = this.mailer.emailTemplates;
-    this.mailerSettings = config.mailer;
-    this.vinculoService = vinculoService;
+    this.mailerSettings = this.config.mailer;
 
     this.fetchFile = fetchFile(this.db, this.fileStorage);
-    this.indicacoesEc = searchEcNominationUseCase(this.db);
-    this.useCasesParticipante = participante(this.db, this.fileStorage);
     this.reprovarIndicacaoService = rejectNominationService(this.db);
+    this.useCasesParticipante = getParticipantesUseCases(
+      this.db,
+      this.siscofWrapper,
+      this.fileStorage,
+      this.mailer,
+      this.mailerSettings,
+      this.logger
+    );
   }
 
   get router(): Router {
     const router = Router();
-
     const requireBackoffice = this.auth.require(
       roles.boAdministrador, roles.boOperacoes
     );
@@ -94,54 +87,36 @@ class ParticipantesController implements Controller {
       roles.ecFinanceiro,
       roles.ecCompras
     );
-    const somenteEstabelecimento = this.auth.requireParticipante(
-      tiposParticipante.estabelecimento
-    );
-    const somenteFornecedor = this.auth.requireParticipante(
-      tiposParticipante.fornecedor
-    );
+    const somenteEstabelecimento = this.auth.requireParticipante(tiposParticipante.estabelecimento);
+    const somenteFornecedor = this.auth.requireParticipante(tiposParticipante.fornecedor);
 
     router.get(
       '/participantes',
-      this.auth.require(
-        roles.boAdministrador,
-        roles.boOperacoes
-      ),
+      requireBackoffice,
       this.pesquisarParticipantes
     );
-
     router.get(
       '/estabelecimento/indicacoes',
-      this.auth.require(
-        roles.boAdministrador,
-        roles.boOperacoes
-      ),
+      requireBackoffice,
       this.pesquisarIndicacoesEc,
     );
-
     router.get(
       '/estabelecimento/:id/indicacoes',
       requireEstabelecimento,
       somenteEstabelecimento,
       this.obterFornecedoresIndicados
     );
-
     router.post(
       '/estabelecimento/:id/indicacao/:indicacaoId/alterar',
       requireEstabelecimento,
       somenteEstabelecimento,
       this.updateFornecedorIndicado
     );
-
     router.post(
       '/estabelecimento/indicacoes/:id/reprovar',
-      this.auth.require(
-        roles.boAdministrador,
-        roles.boOperacoes
-      ),
+      requireBackoffice,
       this.reprovarIndicacao,
     );
-
     // Consultas para o participante
     router.get(
       '/participante/detalhe/cadastro',
@@ -160,7 +135,6 @@ class ParticipantesController implements Controller {
       ),
       this.obterDetalheContato
     );
-
     router.get(
       '/participante/detalhe/domiciliosbancarios',
       this.auth.requireParticipante(
@@ -169,7 +143,6 @@ class ParticipantesController implements Controller {
       ),
       this.obterDetalheDomiciliosBancarios
     );
-
     router.get(
       '/participante/detalhe/condicoescomerciais',
       this.auth.requireParticipante(
@@ -178,7 +151,6 @@ class ParticipantesController implements Controller {
       ),
       this.obterDetalheCondicoesComerciais
     );
-
     router.get(
       '/participante/extrato/:reportId',
       this.auth.requireParticipante(
@@ -187,16 +159,11 @@ class ParticipantesController implements Controller {
       ),
       this.obterExtrato
     );
-
     router.get(
       '/participante/:id/extrato/:reportId',
       requireBackoffice,
       this.obterExtratoBackoffice
     );
-
-    router.get('/fornecedor/:documento', this.procurarFornecedor);
-    router.get('/fornecedores', this.obterFornecedores);
-
     router.get(
       '/fornecedor/:id/estabelecimentos',
       requireFornecedor,
@@ -227,16 +194,6 @@ class ParticipantesController implements Controller {
       somenteFornecedor,
       this.vincularEstabelecimento
     );
-
-    router.get(
-      '/estabelecimentos',
-      this.obterEstabelecimentos
-    );
-    router.get(
-      '/estabelecimento/:documento',
-      this.procurarEstabelecimento
-    );
-
     router.get(
       '/estabelecimento/:id/fornecedores',
       requireEstabelecimento,
@@ -279,197 +236,54 @@ class ParticipantesController implements Controller {
       somenteEstabelecimento,
       this.reativarVinculoFornecedor
     );
-
     router.get(
       '/fornecedor/estabelecimentos/pendentes',
       requireFornecedor,
       somenteFornecedor,
       this.obterFornecedorVinculosPendentes
     );
-
     router.get(
       '/fornecedor/estabelecimentos/reprovados',
       requireFornecedor,
       somenteFornecedor,
       this.obterFornecedorIndicacoesReprovadas
     );
-
-    // APIs para compatibilidade com o Gateway
-    // TODO: Rever forma de consumir essas APIs
+    // APIs para compatibilidade com o Gateway TODO: Rever forma de consumir essas APIs
     router.get(
       '/fornecedor/:fornecedorId/estabelecimento/:estabelecimentoId/vinculo',
       requireFornecedor,
       somenteFornecedor,
       this.obterValorVinculo
     );
-
     return router;
   }
 
-  pesquisarIndicacoesEc = async (req: Request, res: Response, next: NextFunction) => {
-    const { query } = req;
-    return this.indicacoesEc(query)
-      .then(data => res.send(data))
-      .catch(next);
-  }
-
   pesquisarParticipantes = async (req: Request, res: Response, next: NextFunction) => {
-    let where = {};
-
-    if (req.query.term) {
-      where = this.db.where(
-        this.db.fn('unaccent', this.db.col('nome')),
-        { $iLike: this.db.fn('unaccent', `%${req.query.term}%`) }
-      );
+    try {
+      const participantes = await this.useCasesParticipante.searchParticipant(req.query.term);
+      res.send(participantes);
+    } catch (error) {
+      next(error);
     }
-
-    return this.db.entities.participante
-      .findAll({
-        where,
-        attributes: ['id', 'nome'],
-        order: [['nome', 'ASC']],
-      })
-      .then(participantes => participantes.map(c => ({
-        id: c.id,
-        text: `${c.nome}`,
-      })))
-      .then(participantes => res.send(participantes))
-      .catch(next);
   }
 
-  obterParticipante = (identityName) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-      return this.db.entities[identityName]
-        .findAll({
-          attributes: ['participanteId'],
-          include: [{
-            model: this.db.entities.participante,
-            attributes: ['id', 'documento', 'nome'],
-          }],
-        })
-        .then(found => res.send(
-          found.map(t => ({ ...t.participante.dataValues }))
-        ))
-        .catch(next);
-    };
+  pesquisarIndicacoesEc = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { query } = req;
+      const nominations = await this.useCasesParticipante.searchEcNomination(query);
+      res.send(nominations);
+    } catch (error) {
+      next(error);
+    }
   }
-
-  obterFornecedores = this.obterParticipante('participanteFornecedor');
-  obterEstabelecimentos = this.obterParticipante('participanteEstabelecimento');
-
-  procurarParticipante = (identityName) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-      const participanteId = +req.user.participante;
-      const { documento } = req.params;
-
-      try {
-        const found = await this.db.entities[identityName].findOne({
-          attributes: ['participanteId'],
-          include: [{
-            model: this.db.entities.participante,
-            attributes: ['id', 'documento', 'nome'],
-            where: {
-              documento,
-              ativo: true,
-            },
-          }],
-        });
-
-        if (found) {
-          return res.send(found.participante);
-        }
-
-        const indicacoes = this.db.entities.indicacaoFornecedorFalha;
-        const indicacao = {
-          participanteId,
-          documento,
-          usuario: req.user.email,
-        };
-
-        const jaIndicado = await indicacoes.findOne({ where: indicacao });
-
-        if (jaIndicado) {
-          return res.send({});
-        }
-
-        await indicacoes.create(indicacao);
-        return res.send({});
-      } catch (error) {
-        return next(error);
-      }
-    };
-  }
-
-  procurarFornecedor = this.procurarParticipante(
-    'participanteFornecedor'
-  );
-
-  procurarEstabelecimento = this.procurarParticipante(
-    'participanteEstabelecimento'
-  );
 
   indicarFornecedor = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const estabelecimentoComercialId = +req.user.participante;
-      const { documento, nome, email, telefone } = req.body;
+      const { documento, nome, email, telefone, participanteFornecedor } = req.body;
 
-      const tipoPessoa = personTypeEnum.verifyPersonType(documento);
-      const canalEntrada = req.user.participanteFornecedor
-        ? participateNominationSourceEnum.indicacaoPorFornecedor
-        : participateNominationSourceEnum.indicacaoPorEc;
-      const statusPendente = participanteVinculoStatus.pendente;
-
-      const participantes = await this.db.entities.participante.findAll({
-        where: {
-          id: estabelecimentoComercialId,
-          ativo: true,
-        },
-        attributes: ['id', 'nome', 'razaoSocial'],
-        include: [{
-          model: this.db.entities.participanteIndicacao,
-          as: 'indicacoes',
-          attributes: ['id', 'documento'],
-        }],
-      });
-
-      const estabelecimentoComercial = participantes.find(
-        i => i.id === estabelecimentoComercialId
-      );
-
-      if (!estabelecimentoComercial) {
-        throw Error('estabelecimento-nao-encontrado');
-      }
-
-      if (estabelecimentoComercial.indicacoes.some(i => i.documento === documento)) {
-        throw Error('fornecedor-ja-indicado');
-      }
-
-      await this.db.entities.participanteIndicacao.create({
-        documento,
-        nome,
-        email,
-        telefone,
-        tipoPessoa,
-        canalEntrada,
-        statusPendente,
-        participanteId: estabelecimentoComercialId,
-        usuario: req.user.email
-      });
-
-      try {
-        await this.mailer.enviar({
-          templateName: this.emailTemplates.INDICACAO_FORNECEDOR_NAO_CADASTRADO,
-          destinatary: req.user.email,
-          substitutions: {
-            estabelecimento: estabelecimentoComercial.razaoSocial
-              || estabelecimentoComercial.nome,
-            fornecedor: formatDocumento(documento),
-            linkCessao: `${this.mailerSettings.baseUrl}/cessoes`,
-          },
-        });
-      } catch (e) {
-        this.logger.error(e);
-      }
+      await this.useCasesParticipante
+        .indicateProvider(nome, email, telefone, documento, participanteFornecedor, estabelecimentoComercialId);
 
       return res.end();
     } catch (error) {
@@ -479,246 +293,36 @@ class ParticipantesController implements Controller {
 
   vincular = (solicitadoEstabelecimento) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-      const estabelecimentoComercialId = solicitadoEstabelecimento
-        ? +req.user.participante
-        : +req.body.estabelecimentoComercialId;
-      const fornecedorId = !solicitadoEstabelecimento
-        ? +req.user.participante
-        : +req.body.fornecedorId;
-
-      if (estabelecimentoComercialId === fornecedorId) {
-        throw new Error('vinculo-mesmo-participante-invalido');
+      try {
+        const { participante, email } = req.user;
+        const { estabelecimentoComercialId, fornecedorId } = req.body;
+        await this.useCasesParticipante.link(
+          solicitadoEstabelecimento,
+          participante,
+          email,
+          estabelecimentoComercialId,
+          fornecedorId);
+        res.end();
+      } catch (error) {
+        next(error);
       }
-
-      const contatoInclude = () => ({
-        model: this.db.entities.participanteContato,
-        as: 'contatos',
-        attributes: ['participanteId', 'email'],
-        where: { ativo: true },
-      });
-
-      const participanteInclude = () => ({
-        model: this.db.entities.participante,
-        as: 'participante',
-        attributes: ['id', 'nome'],
-        include: [contatoInclude()],
-        where: { ativo: true },
-      });
-
-      const vinculoInclude = () => ({
-        model: this.db.entities.participanteVinculo,
-        as: 'vinculos',
-        attributes: [
-          'id',
-          'participanteEstabelecimentoId',
-          'participanteFornecedorId',
-        ],
-      });
-
-      const createParticipanteVinculo = (
-        participanteEstabelecimentoId,
-        participanteFornecedorId,
-        estabelecimentoSolicitouVinculo,
-        statusVinculo
-      ) => this.db.entities.participanteVinculo.create({
-        participanteEstabelecimentoId,
-        participanteFornecedorId,
-        estabelecimentoSolicitouVinculo,
-        usuario: req.user.email,
-        exibeValorDisponivel: true,
-        diasAprovacao: 2,
-        status: statusVinculo,
-        dataRespostaEstabelecimento: DateTime.local(),
-        usuarioRespostaEstabelecimento: req.user.email,
-      });
-
-      return Promise.all([
-        this.db.entities.participanteFornecedor.findOne({
-          where: { participanteId: fornecedorId },
-          attributes: ['participanteId'],
-          include: [participanteInclude(), vinculoInclude()],
-        }),
-        this.db.entities.participanteEstabelecimento.findOne({
-          where: { participanteId: estabelecimentoComercialId },
-          attributes: ['participanteId'],
-          include: [participanteInclude(), vinculoInclude()],
-        })])
-        .then((results) => {
-          const fornecedor = results[0];
-          const estabelecimento = results[1];
-
-          if (!estabelecimento) {
-            throw new Error('estabelecimento-nao-encontrado');
-          }
-
-          if (!fornecedor) {
-            throw new Error('fornecedor-nao-encontrado');
-          }
-
-          if (solicitadoEstabelecimento && estabelecimento.vinculos.some(
-            f => f.participanteFornecedorId === fornecedorId
-          )) {
-            throw new FornecedorLinked();
-          }
-
-          if (!solicitadoEstabelecimento && fornecedor.vinculos.some(
-            f => f.participanteEstabelecimentoId === estabelecimentoComercialId
-          )) {
-            throw new EstabelecimentoLinked();
-          }
-
-          if (solicitadoEstabelecimento) {
-            return this.siscofWrapper.incluirExcluirCessionarioEC(
-              fornecedorId,
-              estabelecimentoComercialId,
-              participanteVinculoStatus.aprovado
-            )
-              .then(() => {
-                createParticipanteVinculo(
-                  estabelecimentoComercialId,
-                  fornecedorId,
-                  solicitadoEstabelecimento,
-                  participanteVinculoStatus.aprovado
-                )
-                  .then(() => Promise.all([
-                    this.mailer.enviar({
-                      templateName: this.emailTemplates.INDICACAO_FORNECEDOR_CADASTRADO,
-                      destinatary: fornecedor.participante.contatos[0].email,
-                      substitutions: {
-                        estabelecimento: estabelecimento.participante.nome,
-                        linkSolicitarCessao: `${this.mailerSettings.baseUrl}/fornecedor/estabelecimentos`,
-                      },
-                    }),
-                    this.mailer.enviar({
-                      templateName: this.emailTemplates.INDICACAO_FORNECEDOR_CADASTRADO_ESTABELECIMENTO,
-                      destinatary: req.user.email,
-                      substitutions: {
-                        fornecedor: fornecedor.participante.nome,
-                        linkSolicitarCessaoPendentes: `${this.mailerSettings.baseUrl}/estabelecimento/fornecedores`,
-                      },
-                    }),
-                  ]));
-              });
-          }
-
-          return createParticipanteVinculo(
-            estabelecimentoComercialId,
-            fornecedorId,
-            solicitadoEstabelecimento,
-            participanteVinculoStatus.pendente
-          )
-            .then(() => Promise.all([
-              this.mailer.enviar({
-                templateName: this.emailTemplates.INDICACAO_ESTABELECIMENTO_CADASTRADO,
-                destinatary: estabelecimento.participante.contatos[0].email,
-                substitutions: {
-                  fornecedor: fornecedor.participante.nome,
-                  linkFornecedoresCessao: `${this.mailerSettings.baseUrl}/estabelecimento/fornecedores`,
-                },
-              }),
-              this.mailer.enviar({
-                templateName: this.emailTemplates.INDICACAO_ESTABELECIMENTO_FORNECEDOR,
-                destinatary: req.user.email,
-                substitutions: {
-                  estabelecimento: estabelecimento.participante.nome,
-                  linkSolicitarCessao: `${this.mailerSettings.baseUrl}/fornecedor/estabelecimentos`,
-                },
-              }),
-            ]));
-        })
-        .then(() => res.end())
-        .catch(next);
     };
   }
 
   vincularFornecedor = this.vincular(true);
   vincularEstabelecimento = this.vincular(false);
 
-  obterVinculos = (identityName, solicitadoEstabelecimento) => {
+  obterVinculos = (identityName: string, solicitadoEstabelecimento: boolean) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-      const id = +req.user.participante;
-      const statusVinculo = +req.query.status;
-
-      const include = [];
-
-      if (solicitadoEstabelecimento) {
-        include.push({
-          model: this.db.entities.participanteFornecedor,
-          as: 'fornecedor',
-          attributes: ['participanteId'],
-          include: [{
-            model: this.db.entities.participante,
-            as: 'participante',
-            attributes: ['id', 'nome', 'documento'],
-          }],
-        });
-      } else {
-        include.push({
-          model: this.db.entities.participanteEstabelecimento,
-          as: 'estabelecimento',
-          attributes: ['participanteId'],
-          include: [{
-            model: this.db.entities.participante,
-            as: 'participante',
-            attributes: ['id', 'nome', 'documento'],
-          }],
-        });
+      try {
+        const id = +req.user.participante;
+        const statusVinculo = +req.query.status;
+        const vinculos = await this.useCasesParticipante
+          .getBonds(identityName, solicitadoEstabelecimento, id, statusVinculo);
+        res.send(vinculos);
+      } catch (error) {
+        next(error);
       }
-
-      if (statusVinculo === participanteVinculoStatus.reprovado) {
-        include.push({
-          as: 'recusa',
-          model: this.db.entities.motivoTipoRecusa,
-          include: [{
-            model: this.db.entities.motivoRecusa,
-            as: 'motivoRecusa',
-            attributes: ['id', 'descricao', 'requerObservacao'],
-            where: { ativo: true },
-            required: false,
-          }],
-          required: false,
-        });
-      }
-
-      return this.db.entities[identityName].findOne({
-        where: { participanteId: id },
-        include: [{
-          include,
-          model: this.db.entities.participanteVinculo,
-          as: 'vinculos',
-          attributes: [
-            'id',
-            'usuario',
-            'status',
-            'exibeValorDisponivel',
-            'diasAprovacao',
-            'createdAt',
-            'valorMaximoExibicao',
-            'dataRespostaEstabelecimento'
-          ],
-          where: { status: statusVinculo }
-        }],
-      })
-        .then((participanteData) => {
-          if (!participanteData) {
-            res.send([]);
-            return;
-          }
-
-          res.send(participanteData.vinculos.map(t => ({
-            id: t.id,
-            participante: (t.fornecedor || t.estabelecimento)
-              .dataValues.participante.dataValues,
-            status: t.status,
-            exibeValorDisponivel: t.exibeValorDisponivel,
-            valorMaximoExibicao: t.valorMaximoExibicao,
-            diasAprovacao: t.diasAprovacao,
-            dataCadastro: t.createdAt,
-            motivoRecusa: (t.recusa && t.recusa.motivoRecusa) ? t.recusa.motivoRecusa.descricao : '',
-            dataRecusa: t.dataRespostaEstabelecimento
-          })));
-        })
-        .catch(next);
     };
   }
 
@@ -727,42 +331,51 @@ class ParticipantesController implements Controller {
   );
 
   obterFornecedoresIndicados = async (req: Request, res: Response, next: NextFunction) => {
-    const establishment = +req.user.participante;
+    try {
+      const establishment = +req.user.participante;
 
-    return this.useCasesParticipante.getProviderNominees(establishment)
-      .then(arr => res.send(arr))
-      .catch(next);
+      const fornecedoresIndicados = await this.useCasesParticipante.getProviderNominees(establishment);
+      res.send(fornecedoresIndicados);
+    } catch (error) {
+      next(error);
+    }
   }
 
   updateFornecedorIndicado = async (req: Request, res: Response, next: NextFunction) => {
-    const idEc = +req.user.participante;
-    const indication = req.body;
+    try {
+      const idEc = +req.user.participante;
+      const indication = req.body;
 
-    return this.useCasesParticipante.updateProviderNominees(indication, idEc)
-      .then(() => res.end())
-      .catch(next);
+      await this.useCasesParticipante.updateProviderNominees(indication, idEc);
+      res.end();
+    } catch (error) {
+      next(error);
+    }
   }
 
   obterFornecedorVinculos = async (req: Request, res: Response, next: NextFunction) => {
-    const fornecedorId = +req.user.participante;
-    const {
-      status,
-      nome,
-      documento,
-      dataCadastroInicio,
-      dataCadastroFim,
-    } = req.query;
+    try {
+      const fornecedorId = +req.user.participante;
+      const {
+        status,
+        nome,
+        documento,
+        dataCadastroInicio,
+        dataCadastroFim,
+      } = req.query;
 
-    return getProviderLinksUseCase(this.db, this.siscofWrapper)(
-      fornecedorId,
-      status,
-      nome,
-      documento,
-      dataCadastroInicio,
-      dataCadastroFim
-    )
-      .then(arr => res.send(arr))
-      .catch(next);
+      const providerBonds = await getProviderLinksUseCase(this.db, this.siscofWrapper)(
+        fornecedorId,
+        status,
+        nome,
+        documento,
+        dataCadastroInicio,
+        dataCadastroFim
+      );
+      res.send(providerBonds);
+    } catch (error) {
+      next(error);
+    }
   }
 
   obterFornecedorVinculosPendentes = async (req: Request, res: Response, next: NextFunction) => {
@@ -879,55 +492,26 @@ class ParticipantesController implements Controller {
       const id = +req.body.id;
       const estabelecimentoId = +req.user.participante;
 
-      return this.db.entities.participanteVinculo.findOne({
-        where:
-        {
+      try {
+        const vinculos = await this.useCasesParticipante.getProviderBonds(
           id,
-          participanteEstabelecimentoId: estabelecimentoId,
-        },
-      })
-        .then((vinculo) => {
-          if (!vinculo) {
-            throw new VinculoNotFound();
-          }
+          estabelecimentoId,
+          novoStatus,
+          req.user.email,
+          +req.body.motivoTipoRecusaId,
+          req.body.observacao
+        );
 
-          return this.siscofWrapper.incluirExcluirCessionarioEC(
-            vinculo.participanteFornecedorId,
-            vinculo.participanteEstabelecimentoId,
-            novoStatus
-          )
-            .then(() => {
-              vinculo.status = novoStatus;
+        try {
+          await this.notificarIndicacao(vinculos);
+        } catch (error) {
+          this.logger.error(error);
+        }
 
-              if (novoStatus === participanteVinculoStatus.aprovado
-                || novoStatus === participanteVinculoStatus.reprovado) {
-                vinculo.dataRespostaEstabelecimento = DateTime.local();
-                vinculo.usuarioRespostaEstabelecimento = req.user.email;
-              }
-
-              if (novoStatus === participanteVinculoStatus.cancelado
-                || novoStatus === participanteVinculoStatus.reprovado) {
-                vinculo.motivoTipoRecusaId = +req.body.motivoTipoRecusaId;
-                vinculo.motivoRecusaObservacao = req.body.observacao;
-              }
-
-              return Promise.all([
-                vinculo.save(),
-                this.db.entities.participanteVinculoHistorico.create({
-                  participanteEstabelecimentoId: vinculo.participanteEstabelecimentoId,
-                  participanteFornecedorId: vinculo.participanteFornecedorId,
-                  status: vinculo.status,
-                  exibeValorDisponivel: vinculo.exibeValorDisponivel,
-                  diasAprovacao: vinculo.diasAprovacao,
-                  dataRespostaEstabelecimento: new Date(),
-                  usuarioRespostaEstabelecimento: req.user.email,
-                }),
-                this.notificarIndicacao(vinculo),
-              ]);
-            });
-        })
-        .then(() => res.end())
-        .catch(next);
+        res.end();
+      } catch (error) {
+        next(error);
+      }
     };
   }
 

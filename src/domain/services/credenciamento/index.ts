@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize-database';
 import { SiscofWrapper } from '../../../infra/siscof';
 import { FileStorage } from '../../../infra/fileStorage';
+import { LoggerInterface } from '../../../infra/logging';
 
 import applyFiles from './applyFiles';
 import approveService from './approveService';
@@ -10,6 +11,8 @@ import fetchSuggestionFile from './fetchSuggestionFile';
 import findService from './findService';
 import mutateService from './mutateService';
 import inactivateDuplicatesService from './inactivateDuplicatesService';
+import { getCredenciamentoMutateServices } from './mutate';
+import { getCredenciamentoApproveServices } from './approve';
 
 export interface CredenciamentoServices {
   applyFiles?: typeof applyFiles;
@@ -25,17 +28,20 @@ export interface CredenciamentoServices {
 export function getCredenciamentoServices(
   db: Sequelize,
   siscofWrapper: SiscofWrapper,
-  fileStorage: FileStorage
+  fileStorage: FileStorage,
+  logger: LoggerInterface
 ) {
   const services: CredenciamentoServices = {};
+  const credenciamentoMutateServices = getCredenciamentoMutateServices(db, fileStorage);
+  const credenciamentoApproveServices = getCredenciamentoApproveServices(db, siscofWrapper, logger);
 
   services.applyFiles = applyFiles;
   services.deformatDocument = deformatDocument;
-  services.approveService = approveService(db, siscofWrapper, services);
+  services.approveService = approveService(services, credenciamentoApproveServices);
   services.fetchAccreditationFile = fetchAccreditationFile(db, fileStorage);
   services.fetchSuggestionFile = fetchSuggestionFile(db, fileStorage);
   services.findService = findService(db);
-  services.mutateService = mutateService(db, fileStorage);
+  services.mutateService = mutateService(credenciamentoMutateServices);
   services.inactivateDuplicatesService = inactivateDuplicatesService(db);
 
   return services;

@@ -1,30 +1,31 @@
-export enum TipoPessoa {
+import deformatDocument from '../../domain/services/credenciamento/deformatDocument';
+
+export enum MovideskTipoPessoa {
   Pessoa = 1,
   Empresa = 2,
   Departamento = 4
 }
 
-export enum TipoPerfil {
+export enum MovideskTipoPerfil {
   Agente = 1,
   Cliente = 2,
   AgenteCliente = 3
 }
 
-export function getTipoPessoa(documento: string): TipoPessoa {
+export function getMovideskTipoPessoa(documento: string): MovideskTipoPessoa {
   const CPF_LENGTH = 11;
-
-  if (String(documento).length === CPF_LENGTH) {
-    return TipoPessoa.Pessoa;
+  if (deformatDocument(documento).length === CPF_LENGTH) {
+    return MovideskTipoPessoa.Pessoa;
   }
-  return TipoPessoa.Empresa;
+  return MovideskTipoPessoa.Empresa;
 }
 
-export interface Person {
+export interface MovideskPerson {
   id?: string;
   codeReferenceAdditional?: string;
   isActive: boolean;
-  personType: TipoPessoa;
-  profileType: TipoPerfil;
+  personType: MovideskTipoPessoa;
+  profileType: MovideskTipoPerfil;
   accessProfile?: string;
   corporateName?: string;
   businessName: string;
@@ -43,16 +44,16 @@ export interface Person {
   changedDate?: Date;
   changedBy?: string;
   observations?: string;
-  addresses?: Address[];
-  contacts?: Contact[];
-  emails?: Email[];
+  addresses?: MovideskAddress[];
+  contacts?: MovideskContact[];
+  emails?: MovideskEmail[];
   teams?: string[];
-  relationships?: Relationship[];
-  customFieldValues?: CustomFieldValue[];
-  atAssets?: Asset[];
+  relationships?: MovideskRelationship[];
+  customFieldValues?: MovideskCustomFieldValue[];
+  atAssets?: MovideskAsset[];
 }
 
-export interface Address {
+export interface MovideskAddress {
   addressType: string;
   country?: string;
   postalCode?: string;
@@ -66,19 +67,19 @@ export interface Address {
   isDefault: boolean;
 }
 
-export interface Contact {
+export interface MovideskContact {
   contactType: string;
   contact: string;
   isDefault: boolean;
 }
 
-export interface Email {
+export interface MovideskEmail {
   emailType: string;
   email: string;
   isDefault: boolean;
 }
 
-export interface Relationship {
+export interface MovideskRelationship {
   id?: string;
   name?: string;
   slaAgreement?: string;
@@ -86,16 +87,16 @@ export interface Relationship {
   allowAllServices?: boolean;
   includeInParents?: boolean;
   loadChildOrganizations?: boolean;
-  services?: Service[];
+  services?: MovideskService[];
 }
 
-export interface Service {
+export interface MovideskService {
   id: number;
   name?: string;
   copyToChildren?: boolean;
 }
 
-export interface CustomFieldValue {
+export interface MovideskCustomFieldValue {
   customFieldId: number;
   customFieldRuleId: number;
   line: number;
@@ -103,14 +104,14 @@ export interface CustomFieldValue {
   items?: any[];
 }
 
-export interface Item {
+export interface MovideskItem {
   personId?: number;
   clientId?: number;
   team?: string;
   customFieldItem?: string;
 }
 
-export interface Asset {
+export interface MovideskAsset {
   id?: string;
   name?: string;
   label?: string;

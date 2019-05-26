@@ -1,7 +1,10 @@
-const deformatDocument = (documento) => {
-  // Regex para remover pontos e traços do CPF ou CNPJ
-  const pattern = /[\\./-]/g;
-  return documento.replace(pattern, '');
-};
+/**
+ * Retorna o (documento) sem os caracteres de ponto, de traço, e barras
+ *
+ * @param documento CPF ou CNPJ
+ */
+function deformatDocument(documento: string) {
+  return (documento || '').replace(/[.\/\\-]/g, '');
+}
 
 export default deformatDocument;

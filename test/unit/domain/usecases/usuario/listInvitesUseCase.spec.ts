@@ -1,6 +1,7 @@
 import listInvitesUseCase from '../../../../../src/domain/usecases/usuario/listInvitesUseCase';
 import database from '../../../../support/database';
 import usuarioStatus from '../../../../../src/domain/entities/usuarioStatus';
+import { DatatableInterface } from '../../../../../src/domain/services/datatable/getDatatableOptionsService';
 
 describe('Domain :: UseCases :: Usuario :: ListInvites', () => {
 
@@ -12,12 +13,16 @@ describe('Domain :: UseCases :: Usuario :: ListInvites', () => {
       return Promise.resolve([]);
     };
 
+    database.entities.usuarioConvite.count = (): any => {
+      return Promise.resolve([]);
+    };
+
     const participanteId = 1;
-    const status = usuarioStatus.convidado;
+    const filter = { status: usuarioStatus.ativo };
+    const datatableOptions: DatatableInterface = { pageSize: 10, pageIndex: 0, sortColumn: '', sortOrder: 'asc' };
 
-    const result = await listInvites(participanteId, status);
-    expect(Array.isArray(result)).toBe(true);
-
+    const result = await listInvites(participanteId, filter, datatableOptions);
+    expect(typeof result === 'object').toBe(true);
     done();
   });
 

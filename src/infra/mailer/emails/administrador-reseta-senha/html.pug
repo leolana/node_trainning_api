@@ -1,0 +1,21 @@
+extends ./../layout.pug
+
+block title
+    | Redefinição de Senha
+
+block content
+    p Prezado,
+    br
+    p
+        | Por questões de segurança, pedimos para que redefina a sua senha.
+        | Clique no link abaixo para redefini-la
+        |
+        |
+    br
+    div(style="text-align:center;")
+        |
+        a.alpe-button(href=linkRedefinirSenha) Redefinir senha
+    br
+    br
+    p Acesse o Portal Alpe através do endereço:
+    a(href=baseUrl) #{baseUrl}

@@ -25,6 +25,15 @@ const usuarioModel = (sequelize: Sequelize, dataTypes: DataTypes) => {
         type: dataTypes.STRING(11),
         allowNull: false
       },
+
+      username: {
+        type: dataTypes.STRING(50),
+        allowNull: true,
+      },
+      documento: {
+        type: dataTypes.STRING(18),
+        allowNull: true,
+      },
       roles: {
         type: dataTypes.ARRAY(dataTypes.STRING(50)),
         allowNull: false,

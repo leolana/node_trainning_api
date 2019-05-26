@@ -10,6 +10,7 @@ import { rolesEnum as roles } from '../../../domain/services/auth/rolesEnum';
 
 import types from '../../../constants/types';
 import { Sequelize } from 'sequelize-database';
+import { LoggerInterface } from '../../../infra/logging';
 
 @injectable()
 class NotificationController implements Controller {
@@ -19,9 +20,10 @@ class NotificationController implements Controller {
   constructor(
     @inject(types.Database) private db: Sequelize,
     @inject(types.AuthFactory) auth: () => Auth,
+    @inject(types.Logger) private logger: LoggerInterface,
   ) {
     this.auth = auth();
-    this.usecases = getNotificationUseCases(this.db);
+    this.usecases = getNotificationUseCases(this.db, this.logger);
   }
 
   get router(): Router {

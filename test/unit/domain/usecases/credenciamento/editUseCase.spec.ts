@@ -6,16 +6,9 @@ import editUseCase from '../../../../../src/domain/usecases/credenciamento/editU
 import credenciamentoStatusEnum from '../../../../../src/domain/entities/credenciamentoStatusEnum';
 
 describe('Domain :: UseCases :: Credenciamento :: Edit', () => {
-  const mailer = {
-    enviar: () => Promise.resolve(),
-    emailTemplates: {
-      CREDENCIAMENTO_VALORES_ALTERADOS: null
-    }
-  };
 
-  const mailerSettings = {
-    mailingList: null,
-    baseUrl: null
+  const logger: any = {
+    error: () => 0
   };
 
   const files = null;
@@ -169,6 +162,7 @@ describe('Domain :: UseCases :: Credenciamento :: Edit', () => {
     taxaContratualId: 3,
     condicaoComercial: {
       taxaContratual: {},
+      antecipacao: {},
       taxasDebito:
         taxasDebito.map(t => ({
           taxaBandeiraId: t.id,
@@ -192,6 +186,11 @@ describe('Domain :: UseCases :: Credenciamento :: Edit', () => {
     }
   };
 
+  database.transaction = async () => ({
+    rollback: async () => null,
+    commit: async () => null
+  });
+
   const services = {
     mutateService: () => Promise.resolve([{ id: 1 }]),
     approveService: () => Promise.resolve(credenciamento),
@@ -202,24 +201,30 @@ describe('Domain :: UseCases :: Credenciamento :: Edit', () => {
     })
   };
 
-  test('Should edit a user', async (done) => {
-    const edit = editUseCase(database, mailer, mailerSettings, services);
+  const credenciamentoEditUseCases: any = {
+    findAccreditationParticipant: async () => ({
+      participanteExistente: {
+        domiciliosBancarios: []
+      },
+      credenciamentoAnterior: Object.assign(credenciamento, {
+        status: credenciamentoStatusEnum.aprovado,
+        documento: '46889297814',
+        arquivos: {},
+        update: async () => null
+      }),
+    }),
+    setAccreditationNewRateValues: async () => false,
+    validateAccreditationBeforeEdit: async () => null,
+    inactivatePreviousAccreditation: async () => null,
+    updateParticipantRate: async () => null,
+    checkIfBankingDataChanged: async () => false
+  };
+
+  test('Should edit an accreditation', async (done) => {
+    const edit = editUseCase(database, logger, credenciamentoEditUseCases, services);
     const result = await edit(credenciamento, files, documento, user, unchangedFilesInitial);
     expect(result.nome).toBe(credenciamento.nome);
     done();
   });
 
-  test('Should return documento-informado-diferente-do-existente', async (done) => {
-    const documentoDiferente = '51352684656';
-    const edit = editUseCase(database, mailer, mailerSettings, services);
-
-    try {
-      await edit(credenciamento, files, documentoDiferente, user, unchangedFilesInitial);
-      expect(0).toBe(1);
-    } catch (e) {
-      expect(e.message).toBe('documento-informado-diferente-do-existente');
-    }
-
-    done();
-  });
 });

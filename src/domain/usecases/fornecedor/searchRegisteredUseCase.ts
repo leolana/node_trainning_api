@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon';
-import deformatDocument from '../../../domain/services/credenciamento/deformatDocument';
 import { typeCanalEntrada } from '../../services/participante/typeEnum';
-import ParticipanteIntegracaoTipo from '../../../domain/entities/ParticipanteIntegracaoTipo';
+import deformatDocument from '../../services/credenciamento/deformatDocument';
+import ParticipanteIntegracaoTipo from '../../entities/ParticipanteIntegracaoTipo';
+import ParticipanteIntegracaoStatus from '../../entities/ParticipanteIntegracaoStatus';
 
 const searchRegisteredUseCase = db => (searchFilters) => {
   const fields = [
@@ -82,6 +83,9 @@ const searchRegisteredUseCase = db => (searchFilters) => {
           model: db.entities.participanteIntegracao,
           required: false,
           as: 'integracoes',
+          where: {
+            status: ParticipanteIntegracaoStatus.concluido
+          }
         }]
       }, {
         model: db.entities.participanteVinculo,

@@ -1,10 +1,14 @@
 {
   "extends": [
     "tslint-config-prettier",
-    "tslint-config-airbnb"
+    "tslint-config-airbnb",
+    "tslint-sonarts"
   ],
   "rules": {
-    "max-line-length": [true, {"limit": 120, "ignore-pattern": "^import |^export {(.*?)}"}],
+    "max-line-length": [
+      true,
+      { "limit": 120, "ignore-pattern": "^import |^export {(.*?)}" }
+    ],
     "adjacent-overload-signatures": true,
     "ban-comma-operator": true,
     "no-namespace": true,
@@ -27,15 +31,15 @@
     "no-unsafe-finally": true,
     "no-use-before-declare": true,
     "no-duplicate-imports": true,
-    "no-empty-interface": {"severity": "warning"},
-    "no-import-side-effect": {"severity": "warning"},
-    "no-var-keyword": {"severity": "warning"},
-    "triple-equals": {"severity": "warning"},
-    "deprecation": {"severity": "warning"},
-    "prefer-for-of": {"severity": "warning"},
-    "unified-signatures": {"severity": "warning"},
-    "prefer-const": {"severity": "warning"},
-    "trailing-comma": {"severity": "warning"},
+    "no-empty-interface": { "severity": "warning" },
+    "no-import-side-effect": { "severity": "warning" },
+    "no-var-keyword": { "severity": "warning" },
+    "triple-equals": { "severity": "warning" },
+    "deprecation": { "severity": "warning" },
+    "prefer-for-of": { "severity": "warning" },
+    "unified-signatures": { "severity": "warning" },
+    "prefer-const": { "severity": "warning" },
+    "trailing-comma": { "severity": "warning" },
     "indent": [true, "spaces", 2],
     "quotemark": [true, "single", "avoid-escape", "avoid-template"],
     "no-relative-imports": false,

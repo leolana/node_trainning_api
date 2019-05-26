@@ -1,7 +1,12 @@
-import { config } from '../../config';
 import { LoggerInterface } from '../logging';
+import { Environment } from '../environment/Environment';
+
+import container from '../../container';
+import types from '../../constants/types';
 
 export function banner(log: LoggerInterface): void {
+  const config = container.get<Environment>(types.Environment);
+
   if (config.app.banner) {
     const route = () => `${config.app.uri}:${config.app.port}`;
     log.info('');

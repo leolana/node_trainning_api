@@ -7,6 +7,6 @@ const app = container.get<Application>(types.Application);
 app
   .start()
   .catch((error) => {
-    app.logger.error(error.stack);
+    app.logger.error(error);
     process.exit();
   });

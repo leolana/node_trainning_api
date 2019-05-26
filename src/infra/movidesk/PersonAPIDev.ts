@@ -2,11 +2,11 @@ import { injectable } from 'inversify';
 import * as uuid from 'uuid';
 
 import { PersonAPI, FilterExpression, OrderExpression, Expand } from './PersonAPI';
-import { Person  } from './PersonTypes';
+import { MovideskPerson } from './PersonTypes';
 
 @injectable()
 class PersonAPIDev implements PersonAPI {
-  private getPerson(id: string): Person {
+  private getPerson(id: string): MovideskPerson {
     return {
       id,
       isActive: true,
@@ -63,7 +63,7 @@ class PersonAPIDev implements PersonAPI {
     return [this.getPerson(uuid.v4())];
   }
 
-  public async create(data: Person, returnAllProperties?: boolean) {
+  public async create(data: MovideskPerson, returnAllProperties?: boolean) {
     const newId = uuid.v4();
 
     if (returnAllProperties) {
@@ -71,10 +71,10 @@ class PersonAPIDev implements PersonAPI {
       return data;
     }
 
-    return { id: newId } as Person;
+    return { id: newId } as MovideskPerson;
   }
 
-  public async update(id: string, data: Person) {
+  public async update(id: string, data: MovideskPerson) {
     return;
   }
 }

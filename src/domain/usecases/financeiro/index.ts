@@ -1,15 +1,15 @@
 import listConsolidatedDataForProvider from './listConsolidatedDataForProvider';
-import exportRelatorioUseCase from './exportRelatorioUseCase';
+import exportRelatorioDetalhadoUseCase from './exportRelatorioDetalhadoUseCase';
 
 export interface FinanceiroUseCases {
   listConsolidatedDataForProvider?: ReturnType<typeof listConsolidatedDataForProvider>;
-  exportRelatorio?: ReturnType<typeof exportRelatorioUseCase>;
+  exportRelatorio?: typeof exportRelatorioDetalhadoUseCase;
 }
 
 export function getFinanceiroUseCases(db, siscofWrapper) {
   const usecases: FinanceiroUseCases = {};
 
   usecases.listConsolidatedDataForProvider = listConsolidatedDataForProvider(db, siscofWrapper);
-  usecases.exportRelatorio = exportRelatorioUseCase();
+  usecases.exportRelatorio = exportRelatorioDetalhadoUseCase;
   return usecases;
 }

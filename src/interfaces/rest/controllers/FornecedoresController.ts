@@ -17,44 +17,55 @@ import checkECIndicationUseCase from '../../../domain/usecases/estabelecimento/c
 import newIndicationUseCase from '../../../domain/usecases/estabelecimento/newIndicationUseCase';
 import participateNominationSourceEnum from '../../../domain/entities/participateNominationSourceEnum';
 import participanteVinculoStatus from '../../../domain/entities/participanteVinculoStatus';
-import personTypeEnum from '../../../domain/services/participante/personTypeEnum';
+import { verifyPersonType } from '../../../domain/services/participante/personTypeEnum';
 import getIndicationEstablishmentUseCase from '../../../domain/usecases/fornecedor/getIndicationEstablishmentUseCase';
 import updateIndicationEstablishmentUseCase from '../../../domain/usecases/fornecedor/updateIndicationEstablishmentUseCase';
+import { MovideskUseCases, getMovideskUseCases } from '../../../domain/usecases/movidesk';
+import { PersonAPI } from '../../../infra/movidesk';
+import { Environment } from '../../../infra/environment/Environment';
 
 import types from '../../../constants/types';
-import { config } from '../../../config';
 
 @injectable()
 class FornecedoresController implements Controller {
   auth: Auth;
-  db: Sequelize;
-  logger: LoggerInterface;
-  siscofWrapper: SiscofWrapper;
   mailer: Mailer;
-  mailerSettings: any;
   fileStorage: FileStorage;
   fornecedor: ReturnType<typeof fornecedor>;
   storage = multer.memoryStorage();
   upload = multer({ storage: this.storage });
+  movideskUsecases: MovideskUseCases;
 
   constructor(
+    @inject(types.Database) private db: Sequelize,
+    @inject(types.Logger) private logger: LoggerInterface,
+    @inject(types.Environment) private config: Environment,
+    @inject(types.SiscofWrapper) private siscofWrapper: SiscofWrapper,
+
     @inject(types.AuthFactory) auth: () => Auth,
-    @inject(types.Database) db: Sequelize,
-    @inject(types.Logger) logger: LoggerInterface,
-    @inject(types.SiscofWrapper) siscofWrapper: SiscofWrapper,
     @inject(types.MailerFactory) mailer: () => Mailer,
+    @inject(types.PersonAPIFactory) personApi: () => PersonAPI,
     @inject(types.FileStorageFactory) fileStorage: () => FileStorage
   ) {
+
     this.auth = auth();
-    this.db = db;
-    this.logger = logger;
-    this.siscofWrapper = siscofWrapper;
     this.mailer = mailer();
-    this.mailerSettings = config.mailer;
     this.fileStorage = fileStorage();
 
     this.fornecedor = fornecedor(
-      db, siscofWrapper, this.auth, this.mailer, this.mailerSettings, this.fileStorage, this.logger
+      this.db,
+      this.siscofWrapper,
+      this.auth,
+      this.mailer,
+      this.config.mailer,
+      this.fileStorage,
+      this.logger
+    );
+
+    this.movideskUsecases = getMovideskUseCases(
+      this.db,
+      personApi(),
+      this.logger
     );
   }
 
@@ -185,17 +196,36 @@ class FornecedoresController implements Controller {
     .catch(next)
 
   mutate = async (req: Request, res: Response, next: NextFunction) => {
-    const { files } = req;
-    const user = req.user.email;
-    const data = JSON.parse(req.body.data);
+    try {
+      const { files } = req;
+      const userEmail = req.user.email;
+      const data = JSON.parse(req.body.data);
 
-    const promise = data.id
-      ? this.fornecedor.edit(data, files, user)
-      : this.fornecedor.add(data, files, user);
+      if (data.id) {
+        await this.fornecedor.edit(data, files, userEmail);
 
-    return promise
-      .then(() => res.end())
-      .catch(next);
+      } else {
+
+        const participantId = await this.fornecedor.add(
+          data,
+          files,
+          userEmail
+        );
+
+        const throwErrors = false;
+
+        await this.movideskUsecases.forceMovideskPersonIntegration(
+          participantId,
+          userEmail,
+          throwErrors
+        );
+      }
+
+      res.end();
+
+    } catch (error) {
+      next(error);
+    }
   }
 
   requestCession = async (req: Request, res: Response, next: NextFunction) => {
@@ -215,13 +245,13 @@ class FornecedoresController implements Controller {
 
   listIdentifiers = async (req: Request, res: Response, next: NextFunction) => this.fornecedor
     .searchIdentifiers(
-      req.params.cnpjthis.Fornecedor, req.params.cnpjEstabelecimento
+      req.params.cnpjFornecedor, req.params.cnpjEstabelecimento
     )
     .then(data => res.send(data))
     .catch(next)
 
   getIdentifier = async (req: Request, res: Response, next: NextFunction) => this.fornecedor
-    .identifier(req.params.cnpjthis.Fornecedor)
+    .identifier(req.params.cnpjFornecedor)
     .then(data => res.send(data))
     .catch(next)
 
@@ -250,7 +280,7 @@ class FornecedoresController implements Controller {
         telefone,
       } = req.body;
       const usuario = req.user.email;
-      const tipoPessoa = personTypeEnum.verifyPersonType(documento);
+      const tipoPessoa = verifyPersonType(documento);
       const canalEntrada = req.user.participanteFornecedor
         ? participateNominationSourceEnum.indicacaoPorFornecedor
         : participateNominationSourceEnum.indicacaoPorEc;

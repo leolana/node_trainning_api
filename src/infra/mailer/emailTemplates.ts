@@ -2,6 +2,7 @@ const emailTemplates = {
   EMAIL_TESTE: 'email-teste',
   DEFINIR_SENHA: 'definir-senha',
   RESETAR_SENHA: 'resetar-senha',
+  ADMINISTRADOR_RESETA_SENHA: 'administrador-reseta-senha',
   CRIACAO_USUARIO: 'criacao-usuario',
   CADASTRO_APROVADOR: 'cadastro-aprovador',
   INDICACAO_FORNECEDOR_CADASTRADO: 'indicacao-fornecedor-cadastrado',

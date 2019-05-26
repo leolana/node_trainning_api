@@ -1,21 +1,33 @@
 import * as oracledb from 'oracledb';
-import { injectable } from 'inversify';
+import { injectable, interfaces } from 'inversify';
 
 import SiscofDbProd from './SiscofDbProd';
 import SiscofDbDev from './SiscofDbDev';
 import SiscofDb from './SiscofDb';
+import { Environment, SiscofEnv } from '../environment/Environment';
 
-import { config } from '../../config';
+import types from '../../constants/types';
 
 @injectable()
 class SiscofDbBootstrapper {
-  private settings: any;
-  constructor() {
-    this.settings = config.siscof;
+  private context: interfaces.Context;
+
+  constructor(
+    context: interfaces.Context
+  ) {
+    this.context = context;
   }
 
-  connectProd(): SiscofDb {
-    const pool = oracledb.createPool(this.settings);
+  create(): SiscofDb {
+    const config: Environment = this.context.container.get<Environment>(types.Environment);
+
+    return config.isDevelopment && config.siscof.enableMock
+      ? this.connectDev()
+      : this.connectProd(config.siscof);
+  }
+
+  private connectProd(config: SiscofEnv): SiscofDb {
+    const pool = oracledb.createPool(config);
 
     const constants = {};
 
@@ -32,7 +44,7 @@ class SiscofDbBootstrapper {
     );
   }
 
-  connectDev(): SiscofDb {
+  private connectDev(): SiscofDb {
     const constants = {
       // Tipos OutFormat
       ARRAY: 4001,

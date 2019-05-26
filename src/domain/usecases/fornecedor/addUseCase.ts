@@ -7,14 +7,22 @@ import validateRange from '../../services/participante/validateRange';
 import formatTax from '../../services/participante/formatTax';
 import formatDocumento from '../../services/participante/formatDocumento';
 import { vinculoConfig } from '../../services/vinculo/vinculoConfig';
+import { Sequelize } from 'sequelize-database';
+import { SiscofWrapper } from '../../../infra/siscof';
+import { Auth } from '../../../infra/auth';
+import { Mailer } from '../../../infra/mailer';
+import { config } from '../../../config';
+import { FileStorage } from '../../../infra/fileStorage';
+import { LoggerInterface } from '../../../infra/logging';
 
 const addUseCase = (
-  db,
-  siscofWrapper,
-  auth,
-  mailer,
-  mailerSettings,
-  fileStorage
+  db: Sequelize,
+  siscofWrapper: SiscofWrapper,
+  auth: Auth,
+  mailer: Mailer,
+  mailerSettings: typeof config.mailer,
+  fileStorage: FileStorage,
+  logger: LoggerInterface
 ) => (data, files, user) => {
   let existingId = null;
 
@@ -164,15 +172,17 @@ const addUseCase = (
       .then(results => results[0]);
   };
 
-  const inviteUser = (fornecedor, usuario, participantId, transaction) => auth
-    .inviteUser({
+  const inviteUser = async (fornecedor, usuario, participantId, transaction) => {
+    const invite = {
       nome: fornecedor.contato.nome,
       email: fornecedor.contato.email,
       celular: fornecedor.contato.celular,
       roles: [rolesEnum.fcAdministrador],
       convidadoPor: usuario,
       participante: participantId,
-    },          transaction);
+    };
+    return await auth.inviteUser(invite, transaction);
+  };
 
   const notifyRegsitry = (supplier, participantId) => {
     const contatoInclude = () => ({
@@ -207,7 +217,11 @@ const addUseCase = (
             linkFornecedoresCadastrados:
               `${mailerSettings.baseUrl}/fornecedor/gerenciamento/cadastrados`,
           },
+        }).catch((error) => {
+          logger.info('Não foi possível enviar email, mas não foi impeditivo.');
+          logger.error(error);
         });
+
         mailer.enviar({
           templateName: mailer.emailTemplates.INDICACAO_FORNECEDOR_CADASTRADO_VINCULO,
           destinatary: supplier.contatos[0].email,
@@ -218,6 +232,9 @@ const addUseCase = (
             linkSolicitarCessao: `${mailerSettings.baseUrl}/
             fornecedor/estabelecimentos`,
           },
+        }).catch((error) => {
+          logger.info('Não foi possível enviar email, mas não foi impeditivo.');
+          logger.error(error);
         });
       });
   };
@@ -263,19 +280,31 @@ const addUseCase = (
   return validate(data)
     .then(() => mapFiles(files, data.documento, 'fornecedor'))
     .then(uploadFiles)
-    .then(uploadedFiles => (getExistingId(data)
-      .then(participantId => db.transaction(
-        t => register(data, user, participantId, uploadedFiles, t)
-          .then(participant => (findCity(participant.cidadeId)
-            .then(city => getNominationsSyncSiscof(participant, city))
-            .then(nominations => Promise.all([
-              save(participant, t),
-              inviteUser(data, user, participant.id, t),
-              createLinks(nominations, participant.id, data, t),
-            ]))
-          ))
-      ))
-    ));
+    .then(async (uploadedFiles) => {
+      const participantId = await getExistingId(data);
+
+      const transaction = await db.transaction();
+      let participant = null;
+
+      try {
+        participant = await register(data, user, participantId, uploadedFiles, transaction);
+        const city = await findCity(participant.cidadeId);
+        const nominations = await getNominationsSyncSiscof(participant, city);
+
+        await Promise.all([
+          save(participant, transaction),
+          inviteUser(data, user, participant.id, transaction),
+          createLinks(nominations, participant.id, data, transaction),
+        ]);
+
+      } catch (error) {
+        await transaction.rollback();
+        throw error;
+      }
+
+      await transaction.commit();
+      return participant && participant.id;
+    });
 };
 
 export default addUseCase;

@@ -1,11 +1,12 @@
 import dataFaker from '../../dataFaker';
+import participanteVinculoStatus from '../../../../src/domain/entities/participanteVinculoStatus';
 
 const participanteVinculoFactory = (factory) => {
   return factory.define('participanteVinculo', {
-    participanteEstabelecimentoId: dataFaker.integer(),
+    participanteEstabelecimentoId: 1,
     participanteFornecedorId: dataFaker.integer(),
     usuario: dataFaker.string({ length: 100 }),
-    status: dataFaker.integer(),
+    status: participanteVinculoStatus.reprovado,
     exibeValorDisponivel: dataFaker.bool(),
     diasAprovacao: dataFaker.integer(),
     dataRespostaEstabelecimento: dataFaker.date(),

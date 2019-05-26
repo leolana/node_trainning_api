@@ -14,12 +14,14 @@ import errorHandler from './logging/errorHandler';
 import autho from '../../interfaces/rest/middlewares/autho';
 import ControllerLoader from './ControllerLoader';
 import { unless } from '../../interfaces/rest/middlewares/unlessRoutes';
+import { Environment } from '../environment/Environment';
 
-import { config } from '../../config';
-
-const params = { secret: config.auth.publicKey };
+import container from '../../container';
+import types from '../../constants/types';
 
 const router = () => {
+  const config = container.get<Environment>(types.Environment);
+  const params = { secret: config.auth.publicKey };
   const appRouter = Router();
 
   appRouter.use(statusMonitor());

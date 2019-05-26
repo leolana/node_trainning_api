@@ -23,7 +23,7 @@ services:
       - 9330:9330
     environment:
       ALPE_CONNECTION_STRING: postgres://postgres:p4SSW0rd@securitizacao-db:5432/alpe
-      ALPE_DATABASE_LOGGING: false
+      ALPE_DATABASE_LOGGING: "false"
       ALPE_KEYCLOAK_ADDRESS: https://sso-dev.yandeh.com.br/auth/realms/Alpe/protocol/openid-connect/token
       ALPE_KEYCLOAK_CLIENT_ID: alpe-bko
       ALPE_KEYCLOAK_CLIENT_SECRET:
@@ -51,7 +51,7 @@ services:
       ALPE_MAILING_LIST: 'gestor@alpenet.com.br'
       ALPE_SENTRY_DSN: 'https://79f2165f8f6f4b05ad75cc542927524e@sentry.io/1362831'
       ALPE_APIS_MOVIDESK: 'https://api.movidesk.com/public/v1'
-      ALPE_MOVIDESK_TOKEN: '04AF3396299647D7ACA44BEBE0931CED'
+      ALPE_MOVIDESK_TOKEN: 'dca7ac49-71a3-45dc-a5f5-3317e78ec587'
 
 volumes:
   vl-securitizacao-db:

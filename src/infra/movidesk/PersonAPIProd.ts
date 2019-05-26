@@ -1,15 +1,25 @@
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import * as request from 'request-promise-native';
 
-import { config } from '../../config';
 import { PersonAPI, FilterExpression, OrderExpression, Expand } from './PersonAPI';
-import { Person } from './PersonTypes';
+import { MovideskPerson } from './PersonTypes';
+import { LoggerInterface } from '../logging';
+import { Environment, MovideskEnv } from '../environment/Environment';
+
+import types from '../../constants/types';
 
 @injectable()
 class PersonAPIProd implements PersonAPI {
-  private settings = config.movidesk;
+  private settings: MovideskEnv;
 
-  private async getToken() {
+  constructor(
+    @inject(types.Logger) private logger: LoggerInterface,
+    @inject(types.Environment) config: Environment
+  ) {
+    this.settings = config.movidesk;
+  }
+
+  get token() {
     return this.settings.token;
   }
 
@@ -26,14 +36,15 @@ class PersonAPIProd implements PersonAPI {
     }).join(',');
   }
 
-  public async find(id: string): Promise<Person> {
-    const token = await this.getToken();
+  public async find(id: string): Promise<MovideskPerson> {
+    this.logger.info('Movidesk PersonAPIProd.find');
+
     return request({
       uri: `${this.settings.address}/persons`,
       method: 'GET',
       qs: {
-        token,
-        id
+        id,
+        token: this.token
       },
       json: true
     });
@@ -46,75 +57,64 @@ class PersonAPIProd implements PersonAPI {
     skip?: number,
     select?: string[],
     expand?: Expand[]
-  ): Promise<Person[]> {
-    const query = {
-      $filter: undefined,
-      $orderBy: undefined,
-      $top: undefined,
-      $skip: undefined,
-      $select: undefined,
-      $expand: undefined
+  ): Promise<MovideskPerson[]> {
+    this.logger.info('Movidesk PersonAPIProd.list');
+
+    const query: any = {
+      token: this.token
     };
 
     if (filter) {
-      query.$filter = filter.map(f => `${f.field} ${f.op} ${f.value}`).join(' and ');
+      query.$filter = filter.map(f => `${f.field} ${f.op} '${f.value}'`).join(' and ');
     }
-
     if (orderBy) {
       query.$orderBy = orderBy.map(o => `${o.field} ${o.order || 'asc'}`).join(',');
     }
-
     if (top) {
       query.$top = top;
     }
-
     if (skip) {
       query.$skip = skip;
     }
-
     if (select) {
       query.$select = select.join(',');
     }
-
     if (expand) {
       query.$expand = this.generateExpandQuery(expand);
     }
 
-    const token = await this.getToken();
-
     return request({
       uri: `${this.settings.address}/persons`,
       method: 'GET',
-      qs: {
-        token,
-        ...query
-      },
+      qs: query,
       json: true
     });
   }
 
-  public async create(data: Person, returnAllProperties?: boolean) {
-    const token = await this.getToken();
+  public async create(data: MovideskPerson, returnAllProperties = false) {
+    this.logger.info('Movidesk PersonAPIProd.create');
+
     return request({
       uri: `${this.settings.address}/persons`,
       method: 'POST',
       qs: {
-        token,
-        returnAllProperties: returnAllProperties || false
+        returnAllProperties,
+        token: this.token
       },
       body: data,
       json: true
     });
   }
 
-  public async update(id: string, data: Person) {
-    const token = await this.getToken();
+  public async update(id: string, data: MovideskPerson) {
+    this.logger.info('Movidesk PersonAPIProd.update');
+
     return request({
       uri: `${this.settings.address}/persons`,
       method: 'PATCH',
       qs: {
-        token,
-        id
+        id,
+        token: this.token
       },
       body: data,
       json: true

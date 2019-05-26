@@ -5,18 +5,19 @@ import * as Email from 'email-templates';
 
 import emailTemplates from './emailTemplates';
 import { LoggerInterface } from '../logging';
+import { Environment, MailerEnv } from '../environment/Environment';
 import { validateEmailSubject, Mailer } from './Mailer';
 
-import { config } from '../../config';
 import types from '../../constants/types';
 
 @injectable()
 class MailerAWS implements Mailer {
-  private settings: any;
+  private settings: MailerEnv;
   private logger: any;
 
   constructor(
     @inject(types.Logger) logger: LoggerInterface,
+    @inject(types.Environment) config: Environment
   ) {
     this.settings = config.mailer;
     this.logger = logger;

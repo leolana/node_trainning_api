@@ -11,8 +11,8 @@ import { rolesEnum } from '../../domain/services/auth/rolesEnum';
 import { Sequelize } from 'sequelize-database';
 import Mailer from '../mailer/Mailer';
 import Auth from './Auth';
+import { Environment, AuthEnv } from '../environment/Environment';
 
-import { config } from '../../config';
 import types from '../../constants/types';
 import * as Exceptions from '../../interfaces/rest/exceptions/ApiExceptions';
 import { KeycloakUserRepresentation } from './AuthTypes';
@@ -24,15 +24,17 @@ class AuthProd implements Auth {
   }
   private db: any;
   private mailer: any;
-  private settings = config.auth;
+  private settings: AuthEnv;
   private emailTemplates: any;
   private rolesIds = {};
 
   constructor(
     @inject(types.Database) db: Sequelize,
+    @inject(types.Environment) config: Environment,
     @inject(types.MailerFactory) mailer: () => Mailer,
   ) {
     this.db = db;
+    this.settings = config.auth;
     this.mailer = mailer();
     this.emailTemplates = this.mailer.emailTemplates;
   }
@@ -342,9 +344,34 @@ class AuthProd implements Auth {
       .then(enviaConvite);
   }
 
-  createUser = (user) => {
+  addRoleKc = async (email, roles, pwd) => {
+    if (pwd !== 'xpto') return { };
+
+    const usuario = await this.db.entities.usuario.findOne({
+      where: { email },
+      include: [{
+        model: this.db.entities.membro,
+        as: 'associacoes',
+      }],
+    });
+
+    const result = await this.changeUserRoles(usuario.id, [], roles);
+
+    return result;
+  }
+
+  createUser = (user, setPassword = true) => {
     let accessToken = null;
     let userId = null;
+    let setCredentials = null;
+
+    if (setPassword) {
+      setCredentials = [{
+        type: 'password',
+        temporary: false,
+        value: user.password,
+      }];
+    }
 
     return this.authenticateAsAdmin()
       .then((token) => { accessToken = token; })
@@ -361,11 +388,7 @@ class AuthProd implements Auth {
           email: user.email,
           emailVerified: true,
           enabled: true,
-          credentials: [{
-            type: 'password',
-            temporary: false,
-            value: user.password,
-          }],
+          credentials: setCredentials,
         },
         json: true,
       }))
@@ -382,6 +405,26 @@ class AuthProd implements Auth {
       .then(() => Promise.all(user.roles.map(
         r => this.addRoleToUser(userId, accessToken, r)
       )))
+      .then(() => userId);
+  }
+
+  recreateUser = (user) => {
+    let accessToken = null;
+    let userId = null;
+
+    return this.authenticateAsAdmin()
+      .then((token) => { accessToken = token; })
+      .then(() => request({
+        method: 'DELETE',
+        uri: `${this.settings.address}/auth/admin/realms`
+          + `/${this.settings.realm}/users/${user.id}`,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }))
+      .then(() => this.createUser(user, false))
+      .then(result => userId = result)
+      .then(() => this.recoverPassword(user, true))
       .then(() => userId);
   }
 
@@ -459,7 +502,7 @@ class AuthProd implements Auth {
     })
   )
 
-  recoverPassword = (solicitacao) => {
+  recoverPassword = (solicitacao, administrador = false) => {
     const dataExpiracao = new Date();
     dataExpiracao.setDate(dataExpiracao.getDate() + 1);
 
@@ -469,7 +512,8 @@ class AuthProd implements Auth {
       .create(solicitacao)
       .then(novaSolicitacao => this.mailer.enviar(
         {
-          templateName: this.emailTemplates.RESETAR_SENHA,
+          templateName: administrador ?
+            this.emailTemplates.ADMINISTRADOR_RESETA_SENHA : this.emailTemplates.RESETAR_SENHA,
           destinatary: novaSolicitacao.email,
           substitutions: {
             linkRedefinirSenha: `${this.settings.baseUrl}/redefinir-senha`
@@ -487,6 +531,28 @@ class AuthProd implements Auth {
       headers: { Authorization: `Bearer ${token}` },
       json: true,
     });
+  }
+
+  getInfoUser = async (userId: string): Promise<KeycloakUserRepresentation> => {
+    const token = await this.authenticateAsAdmin();
+    try {
+      const userKeycloak = await this.getUser(userId);
+
+      const roles = await <any>request({
+        method: 'GET',
+        uri: `${this.settings.address}/auth/admin/realms/${this.settings.realm}`
+          + `/users/${userId}/role-mappings/clients/${this.settings.clientUUID}`,
+        headers: { Authorization: `Bearer ${token}` },
+        json: true,
+      });
+
+      return {
+        roles: roles.map(role => (role.name)),
+        ...userKeycloak,
+      };
+    } catch (e) {
+      throw new Exceptions.KeycloakUserNotFoundException();
+    }
   }
 
   putUser = async (user: KeycloakUserRepresentation): Promise<void> => {

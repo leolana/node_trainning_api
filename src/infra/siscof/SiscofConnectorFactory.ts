@@ -3,9 +3,9 @@ import { interfaces } from 'inversify';
 import SiscofConnector from './SiscofConnector';
 import SiscofConnectorDev from './SiscofConnectorDev';
 import SiscofConnectorProd from './SiscofConnectorProd';
+import { Environment } from '../environment/Environment';
 
 import types from '../../constants/types';
-import { config } from '../../config';
 
 class SiscofConnectorFactory {
   private context: interfaces.Context;
@@ -17,6 +17,7 @@ class SiscofConnectorFactory {
   }
 
   create(): SiscofConnector {
+    const config = this.context.container.get<Environment>(types.Environment);
     const siscofConnector: SiscofConnector = (config.isDevelopment || config.isTesting) && config.siscof.enableMock
       ? this.context.container.get<SiscofConnectorDev>(types.SiscofConnectorDev)
       : this.context.container.get<SiscofConnectorProd>(types.SiscofConnectorProd);

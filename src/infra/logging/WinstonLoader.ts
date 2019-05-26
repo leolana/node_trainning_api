@@ -1,8 +1,8 @@
 import { createLogger, format, transports, Logger } from 'winston';
 
-import { config } from '../../config';
+import { Environment } from '../environment/Environment';
 
-export const winstonLoader = (): Logger => {
+export const winstonLoader = (config: Environment): Logger => {
   const logger = createLogger({
     transports: [
       new transports.Console({

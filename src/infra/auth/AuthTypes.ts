@@ -18,4 +18,5 @@ export interface KeycloakUserRepresentation {
   requiredActions?: string[];
   notBefore?: number;
   access?: KeycloakMapRepresentation;
+  roles? : string[];
 }

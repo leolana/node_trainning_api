@@ -1,8 +1,6 @@
 module.exports = {
+  preset: 'ts-jest',
   testEnvironment: 'node',
-  transform: {
-    '.(ts|tsx)': '<rootDir>/test/preprocessor.js'
-  },
   moduleFileExtensions: [
     'ts',
     'js',
@@ -10,11 +8,12 @@ module.exports = {
     'node',
   ],
   testRegex: '(/__tests__/.*|\\.(test|spec))\\.tsx?$',
-  testEnvironment: 'node',
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'src/**/*.{ts,tsx,js,jsx}',
     '!src/**/*.d.ts',
+    '!src/infra/database/seeds/*.ts',
+    '!src/infra/database/migrations/*.ts'
   ],
-  setupTestFrameworkScriptFile: './test/setup.ts'
+  setupFilesAfterEnv: ['./test/setup.ts']
 };

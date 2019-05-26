@@ -9,7 +9,7 @@ const participanteIntegracaoModel = (sequelize: Sequelize, dataTypes: DataTypes)
     'participanteIntegracao',
     {
       id: {
-        type: dataTypes.UUID,
+        type: dataTypes.STRING(36),
         allowNull: false,
         primaryKey: true
       },

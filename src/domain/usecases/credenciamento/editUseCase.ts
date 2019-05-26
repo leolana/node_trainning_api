@@ -1,312 +1,126 @@
-// tslint:disable:no-magic-numbers
-import deformatDocument from '../../services/credenciamento/deformatDocument';
-import credenciamentoStatusEnum from '../../entities/credenciamentoStatusEnum';
-import rateTypeEnum from '../../services/participante/rateTypeEnum';
-import { CredenciamentoServices } from '../../services/credenciamento';
 import { Sequelize } from 'sequelize-database';
+import { CredenciamentoServices } from '../../services/credenciamento';
+import { LoggerInterface } from '../../../infra/logging';
+import { CredenciamentoEditUseCases } from './edit';
 
-const edit = (
+const editUseCase = (
   db: Sequelize,
-  mailer,
-  mailerSettings,
-  services: CredenciamentoServices
-) => (data, files, documento, user, unchangedFilesInitial) => {
+  logger: LoggerInterface,
+  credenciamentoEditUseCases: CredenciamentoEditUseCases,
+  credenciamentoServices: CredenciamentoServices
+) =>
 
-  const document = deformatDocument(documento);
+  /**
+   * Recebe o (credenciamentoEdicao) dos steps do wizard. Encontra o participante e o credenciamento no postgres
+   * para serem alterados. Valida o status e o documento do credenciamento. Inativa o credenciamento encontrado.
+   * Salva um novo credenciamento e um novo participante com os dados de (credenciamentoEdicao), junto com as
+   * associações de cada. Envia email caso tenha tido alteração de dados bancários ou de taxas.
+   *
+   * @param credenciamentoEdicao Os dados do credenciamento que foi editado nos steps do wizard.
+   * @param files Os arquivos do credenciamento.
+   * @param documento CPF ou CNPJ.
+   * @param userEmail O email do usuário responsável pela edição.
+   * @param unchangedFiles Um objeto com os arquivos que não foram modificados.
+   */
+  async (
+    credenciamentoEdicao: any,
+    files: any[],
+    documento: string,
+    userEmail: string,
+    unchangedFiles: any = {}
+  ) => {
 
-  let participanteExistente = null;
-  let credenciamentoAnterior = null;
-  let ratesChanged = false;
-  let bankingDataChanged = false;
+    const {
+      participanteExistente,
+      credenciamentoAnterior
+    } = await credenciamentoEditUseCases.findAccreditationParticipant(
+      credenciamentoEdicao.dadosCadastrais.id
+    );
 
-  const unchangedFiles = unchangedFilesInitial || [];
+    await credenciamentoEditUseCases.validateAccreditationBeforeEdit(
+      credenciamentoAnterior.status,
+      credenciamentoAnterior.documento,
+      documento
+    );
 
-  const findExisting = id => db.entities.participante.findOne({
-    include: [
-      {
-        model: db.entities.participanteContato,
-        as: 'contatos',
-        required: false,
-        where: { ativo: true },
-      },
-      {
-        model: db.entities.participanteDomicilioBancario,
-        as: 'domiciliosBancarios',
-      },
-      {
-        model: db.entities.participanteTaxa,
-        as: 'taxas',
-      },
-      {
-        model: db.entities.credenciamento,
-        as: 'credenciamentos',
-        required: true,
-        where: {
-          id,
-          ativo: true,
-        },
-        include: [
-          {
-            model: db.entities.credenciamentoTaxaAdministrativa,
-            as: 'taxasAdministrativas',
-          },
-          {
-            model: db.entities.credenciamentoTaxaDebito,
-            as: 'taxasDebito',
-          },
-        ],
-      },
-    ],
-  });
+    const ratesChanged = await credenciamentoEditUseCases.setAccreditationNewRateValues(
+      credenciamentoAnterior,
+      credenciamentoEdicao
+    );
 
-  const validate = (existing) => {
-    if (!existing) throw new Error('registro-nao-encontrado');
+    credenciamentoEdicao.credenciamento = { createdAt: credenciamentoAnterior.createdAt };
 
-    if ((existing.credenciamentos || []).length === 0) {
-      throw new Error('registro-nao-encontrado');
-    }
+    const transaction = await db.transaction();
+    let participanteNovo = null;
 
-    participanteExistente = existing;
-
-    credenciamentoAnterior = participanteExistente.credenciamentos[0];
-
-    if (credenciamentoAnterior.status !== credenciamentoStatusEnum.aprovado) {
-      throw new Error('credenciamento-status-invalido');
-    }
-
-    if (credenciamentoAnterior.documento !== document) {
-      throw new Error('documento-informado-diferente-do-existente');
-    }
-
-    if ((credenciamentoAnterior.arquivos.analises || []).length > 0) {
-      unchangedFiles.analises = credenciamentoAnterior.arquivos.analises;
-    }
-
-    const debitRatesMap = {};
-    const adminRatesMap = {};
-
-    credenciamentoAnterior.taxasDebito.forEach((t) => {
-      debitRatesMap[t.taxaBandeiraId] = t;
-    });
-
-    credenciamentoAnterior.taxasAdministrativas.forEach((t) => {
-      adminRatesMap[t.taxaAdministrativaId] = t;
-    });
-
-    data.condicaoComercial.taxasDebito.forEach((t) => {
-      if (t.id in debitRatesMap) {
-        if (+Number(debitRatesMap[t.id].valor).toFixed(2)
-          !== +Number(t.valor).toFixed(2)) {
-          ratesChanged = true;
-        }
-
-        debitRatesMap[t.id].valor = t.valor;
-      } else {
-        throw new Error('taxa-debito-invalida');
-      }
-    });
-
-    data.condicaoComercial.taxasAdministrativas.forEach((t) => {
-      if (t.id in adminRatesMap) {
-        if (+Number(adminRatesMap[t.id].valor).toFixed(2)
-          !== +Number(t.valor).toFixed(2)) {
-          ratesChanged = true;
-        }
-
-        adminRatesMap[t.id].valor = t.valor;
-      } else {
-        throw new Error('taxa-administrativa-invalida');
-      }
-    });
-
-    const debitRates = [];
-    const adminRates = [];
-
-    for (const t in debitRatesMap) {
-      if (debitRatesMap.hasOwnProperty(t)) {
-        debitRates.push({
-          id: t,
-          valor: debitRatesMap[t].valor,
-        });
-      }
-    }
-
-    for (const t in adminRatesMap) {
-      if (adminRatesMap.hasOwnProperty(t)) {
-        adminRates.push({
-          id: t,
-          valor: adminRatesMap[t].valor,
-        });
-      }
-    }
-
-    data.condicaoComercial.antecipacao = data.condicaoComercial.taxaContratual;
-    data.condicaoComercial.taxaContratual = credenciamentoAnterior.taxaContratualId;
-    data.condicaoComercial.taxasDebito = debitRates;
-    data.condicaoComercial.taxasAdministrativas = adminRates;
-    data.credenciamento = { createdAt: credenciamentoAnterior.createdAt };
-  };
-
-  const checkUpdateRates = (current, newRate, usuarioCriacao, transaction) => {
-    const getRates = () => db.entities.participanteTaxa
-      .findAll({
-        where: {
-          participanteId: participanteExistente.id,
-          participanteTaxaTipo: rateTypeEnum.antecipacao,
-        },
-      });
-
-    const saveHistory = rates => db.entities.participanteTaxaHistorico
-      .bulkCreate(
-        rates.map(r => ({
-          usuarioCriacao,
-          participanteTaxaId: r.id,
-          valorInicio: r.valorInicio,
-          valorFim: r.valorFim,
-          taxa: r.taxa,
-          participanteId: r.participanteId,
-          dataInclusao: r.createdAt,
-          participanteTaxaTipo: r.participanteTaxaTipo,
-        })),
-        { transaction }
+    try {
+      await credenciamentoEditUseCases.inactivatePreviousAccreditation(
+        participanteExistente.id,
+        credenciamentoAnterior,
+        userEmail,
+        transaction
       );
 
-    const deleteCurrent = () => db.entities.participanteTaxa
-      .destroy({
-        transaction,
-        where: {
-          participanteId: participanteExistente.id,
-          participanteTaxaTipo: rateTypeEnum.antecipacao,
-        },
-      });
-
-    const saveNew = () => {
-      const model = {
-        valorInicio: null,
-        valorFim: null,
-        taxa: newRate.antecipacao,
-        participanteId: participanteExistente.id,
-        usuarioCriacao: user,
-        participanteTaxaTipo: rateTypeEnum.antecipacao,
-      };
-
-      return db.entities.participanteTaxa
-        .create(model, { transaction, returning: true });
-    };
-
-    const validateRates = (rates) => {
-      const ratesList = rates || [];
-      let modified = false;
-
-      // Por enquanto somente um valor de antecipação é cadastrado
-      for (const rate of ratesList) {
-        if (rate.taxa !== newRate.antecipacao) {
-          modified = true;
-          break;
-        }
+      if ((credenciamentoAnterior.arquivos.analises || []).length > 0) {
+        unchangedFiles.analises = credenciamentoAnterior.arquivos.analises;
       }
 
-      if (modified) {
-        return saveHistory(ratesList)
-          .then(deleteCurrent)
-          .then(saveNew)
-          .then(() => {
-            current.taxaContratual.antecipacao = newRate.antecipacao;
-            return current;
-          });
-      }
+      const { id: credenciamentoId } = await credenciamentoServices.mutateService(
+        credenciamentoEdicao,
+        credenciamentoAnterior.status,
+        files,
+        documento,
+        userEmail,
+        unchangedFiles,
+        transaction
+      );
 
-      return Promise.resolve();
-    };
+      const credenciamento = await credenciamentoServices.findService(
+        credenciamentoId,
+        transaction
+      );
 
-    return getRates()
-      .then(validateRates)
-      .then(() => current);
-  };
+      await credenciamentoEditUseCases.updateParticipantRate(
+        participanteExistente.id,
+        credenciamento,
+        credenciamentoEdicao.condicaoComercial.antecipacao,
+        userEmail,
+        transaction
+      );
 
-  const updateAccreditation = (transaction: any) => {
-    return credenciamentoAnterior.update(
-      { ativo: false },
-      { transaction },
+      participanteNovo = await credenciamentoServices.approveService(
+        credenciamento,
+        participanteExistente,
+        userEmail,
+        transaction
+      );
+
+      transaction.commit();
+
+    } catch (error) {
+      transaction.rollback();
+      throw error;
+    }
+
+    const bankingDataChanged = await credenciamentoEditUseCases.checkIfBankingDataChanged(
+      participanteExistente,
+      participanteNovo
     );
+
+    try {
+      await credenciamentoEditUseCases.sendEmailAccreditationDataChanged(
+        participanteExistente.nome,
+        participanteNovo.id,
+        userEmail,
+        ratesChanged,
+        bankingDataChanged
+      );
+    } catch (e) {
+      logger.error(`Falha ao enviar email ao participante ${participanteNovo.id} sobre alteração do credenciamento.`);
+      logger.error(e);
+    }
+
+    return participanteNovo;
   };
 
-  const updateTerms = (transaction: any) => {
-    return db.entities.participanteAceiteTermo.update(
-      { usuario: user },
-      {
-        transaction,
-        where: {
-          participanteId: participanteExistente.id,
-        },
-      },
-    );
-  };
-
-  const checkBankingData = (newParticipant) => {
-    const bankingDataMap = {};
-    participanteExistente.domiciliosBancarios.forEach((d) => {
-      bankingDataMap[d.bandeiraId] = d;
-    });
-
-    newParticipant.domiciliosBancarios.forEach((d) => {
-      if (d.bandeiraId in bankingDataMap) {
-        for (const prop in d) {
-          if (d.hasOwnProperty(prop)) {
-            if (prop !== 'credenciamentoId'
-              && prop !== 'createdAt'
-              && prop !== 'updatedAt'
-              && bankingDataMap[d.bandeiraId][prop] !== d[prop]) {
-              bankingDataChanged = true;
-              break;
-            }
-          }
-        }
-      } else {
-        bankingDataChanged = true;
-      }
-    });
-
-    return newParticipant;
-  };
-
-  const notify = (newParticipant) => {
-    const action = ratesChanged || bankingDataChanged
-      ? mailer.enviar({
-        templateName: mailer.emailTemplates.CREDENCIAMENTO_VALORES_ALTERADOS,
-        destinatary: mailerSettings.mailingList,
-        substitutions: {
-          user,
-          estabelecimento: participanteExistente.nome,
-          linkCredenciamento:
-            `${mailerSettings.baseUrl}/`
-            + `credenciamento/${newParticipant.id}`,
-          taxa: ratesChanged,
-          bancario: bankingDataChanged,
-        },
-      })
-      : Promise.resolve();
-
-    return action
-      .then(() => newParticipant);
-  };
-
-  return findExisting(data.dadosCadastrais.id)
-    .then(validate)
-    .then(() => db.transaction(
-      t => Promise.all([
-        services.mutateService(data, credenciamentoAnterior.status, files, document, user, unchangedFiles, t),
-        updateAccreditation(t),
-        updateTerms(t),
-      ])
-        .then(results => services.findService(results[0].id, t))
-        .then(current => checkUpdateRates(
-          current, data.condicaoComercial.antecipacao, user, t
-        ))
-        .then(updated => services.approveService(updated, user, participanteExistente, t))
-        .then(checkBankingData)
-        .then(notify)
-    ));
-};
-
-export default edit;
+export default editUseCase;

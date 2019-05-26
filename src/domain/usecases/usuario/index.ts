@@ -10,6 +10,10 @@ import newUserFromInviteUseCase from './newUserFromInviteUseCase';
 import updateUserStatusUseCase from './updateUserStatusUseCase';
 import validateKeycloakUserStatusUseCase from './validateKeycloakUserStatusUseCase';
 import { LoggerInterface } from '../../../infra/logging';
+import checkUsernameExistenceUseCase from './checkUsernameExistenceUseCase';
+import listUserFromIdUseCase from './listUserFromIdUseCase';
+import recreateUserKeycloakUseCase from './recreateUserKeycloakUseCase';
+import getInfoKeycloakUseCase from './getInfoKeycloakUseCase';
 
 export interface UsuarioUseCases {
   listUsersUseCase?: ReturnType<typeof listUsersUseCase>;
@@ -20,6 +24,10 @@ export interface UsuarioUseCases {
   newUserFromInviteUseCase?: ReturnType<typeof newUserFromInviteUseCase>;
   updateUserStatusUseCase?: ReturnType<typeof updateUserStatusUseCase>;
   validateKeycloakUserStatusUseCase?: ReturnType<typeof validateKeycloakUserStatusUseCase>;
+  checkUsernameExistenceUseCase?: ReturnType<typeof checkUsernameExistenceUseCase>;
+  listUserFromIdUseCase?: ReturnType<typeof listUserFromIdUseCase>;
+  recreateUserKeycloakUseCase?: ReturnType<typeof recreateUserKeycloakUseCase>;
+  getInfoKeycloakUseCase?: ReturnType<typeof getInfoKeycloakUseCase>;
 }
 
 export function getUsuarioUseCases(
@@ -38,6 +46,9 @@ export function getUsuarioUseCases(
   usecases.newUserFromInviteUseCase = newUserFromInviteUseCase(db, auth);
   usecases.updateUserStatusUseCase = updateUserStatusUseCase(db, auth, logger);
   usecases.validateKeycloakUserStatusUseCase = validateKeycloakUserStatusUseCase(db, auth);
-
+  usecases.checkUsernameExistenceUseCase = checkUsernameExistenceUseCase(db);
+  usecases.listUserFromIdUseCase = listUserFromIdUseCase(db);
+  usecases.recreateUserKeycloakUseCase = recreateUserKeycloakUseCase(db, auth, logger);
+  usecases.getInfoKeycloakUseCase = getInfoKeycloakUseCase(auth, logger);
   return usecases;
 }

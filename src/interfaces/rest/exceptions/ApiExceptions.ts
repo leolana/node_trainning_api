@@ -1,5 +1,41 @@
 import * as Errors from '../errors/ApiErrors';
 
+export class InvalidBoundBetweenSameParticipantException extends Errors.ConflictError {
+  constructor() {
+    super('vinculo-mesmo-participante-invalido');
+  }
+}
+
+export class AlreadyNominatedProviderException extends Errors.ConflictError {
+  constructor() {
+    super('fornecedor-ja-indicado');
+  }
+}
+
+export class EstablishmentNotFoundException extends Errors.NotFoundError {
+  constructor() {
+    super('estabelecimento-nao-encontrado');
+  }
+}
+
+export class ProviderNotFoundException extends Errors.NotFoundError {
+  constructor() {
+    super('fornecedor-nao-encontrado');
+  }
+}
+
+export class CouldNotCreatBondException extends Errors.NotFoundError {
+  constructor() {
+    super('erro-criar-vinculo');
+  }
+}
+
+export class TermoNotFoundException extends Errors.NotFoundError {
+  constructor() {
+    super('termo-nao-encontrado');
+  }
+}
+
 export class NotAvailableOptionException extends Errors.PreconditionFailedError {
   constructor() {
     super('option-not-available');
@@ -150,6 +186,30 @@ export class MissingDocumentException extends Errors.PreconditionFailedError {
   }
 }
 
+export class MovideskDocumentMismatchException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('movidesk-document-mismatch');
+  }
+}
+
+export class MovideskUsernameExistsToOtherParticipantIdException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('movidesk-username-exists-to-other-participant-id');
+  }
+}
+
+export class MissingMovideskCodeReferenceException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('missing-movidesk-code-reference');
+  }
+}
+
+export class MissingParticipantException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('missing-participante');
+  }
+}
+
 export class EmptyResultFromMovideskException extends Errors.BadRequestError {
   constructor() {
     super('empty-result-from-movidesk');
@@ -225,6 +285,12 @@ export class KeycloakUserNotFoundException extends Errors.NotFoundError {
 export class InvalidTypeOfPersonException extends Errors.NotFoundError {
   constructor() {
     super('tipoPessoa-invalido');
+  }
+}
+
+export class TermNotFoundException extends Errors.NotFoundError {
+  constructor() {
+    super('termo-nao-encontrado');
   }
 }
 
@@ -304,8 +370,8 @@ export class EstabelecimentoLinked extends Errors.ConflictError {
   }
 }
 
-export class VinculoNotFound extends Errors.NotFoundError {
+export class UsernameAlreadExist extends Errors.ConflictError {
   constructor() {
-    super('vinculo-nao-encontrado');
+    super('username-ja-existe');
   }
 }

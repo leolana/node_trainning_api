@@ -4,8 +4,8 @@ import * as cessionService from './cessao';
 import { Sequelize } from 'sequelize-database';
 import { SiscofWrapper } from '../../infra/siscof';
 import { Mailer } from '../../infra/mailer';
+import { Environment } from '../../infra/environment/Environment';
 
-import { config } from '../../config';
 import types from '../../constants/types';
 import { LoggerInterface } from '../../infra/logging';
 
@@ -21,6 +21,7 @@ class CessionService {
   constructor(
     @inject(types.Database) db: Sequelize,
     @inject(types.SiscofWrapper) siscofWrapper: SiscofWrapper,
+    @inject(types.Environment) config: Environment,
     @inject(types.MailerFactory) mailer: () => Mailer,
     @inject(types.Logger) logger: LoggerInterface,
   ) {

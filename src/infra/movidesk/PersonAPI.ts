@@ -1,4 +1,4 @@
-import { Person } from './PersonTypes';
+import { MovideskPerson } from './PersonTypes';
 
 // Expressões OData
 
@@ -6,7 +6,7 @@ import { Person } from './PersonTypes';
 export type FilterExpression = {
   field: string;
   op: 'eq' | 'ne' | 'gt' | 'lt' | 'ge' | 'le';
-  value: string;
+  value: any;
 };
 
 export type OrderExpression = {
@@ -20,7 +20,7 @@ export type Expand = {
 };
 
 export interface PersonAPI {
-  find: (id: string) => Promise<Person>;
+  find: (id: string) => Promise<MovideskPerson>;
   list: (
     filter?: FilterExpression[],
     orderBy?: OrderExpression[],
@@ -28,9 +28,9 @@ export interface PersonAPI {
     skip?: number,
     select?: string[],
     expand?: Expand[]
-  ) => Promise<Person[]>;
-  create: (data: Person, returnAllProperties?: boolean) => Promise<Person>;
-  update: (id: string, data: Person) => Promise<void>;
+  ) => Promise<MovideskPerson[]>;
+  create: (data: MovideskPerson, returnAllProperties?: boolean) => Promise<MovideskPerson>;
+  update: (id: string, data: MovideskPerson) => Promise<void>;
 }
 
 export default PersonAPI;

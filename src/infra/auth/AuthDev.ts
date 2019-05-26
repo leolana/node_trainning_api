@@ -4,6 +4,7 @@ import { injectable, inject } from 'inversify';
 import * as jwt from 'jsonwebtoken';
 import { Response, NextFunction } from 'express';
 import { Request } from 'express-request';
+import * as chance from 'chance';
 
 import termoTipo from '../../domain/entities/termoTipo';
 import { rolesEnum } from '../../domain/services/auth/rolesEnum';
@@ -11,23 +12,23 @@ import { Sequelize } from 'sequelize-database';
 import Auth from './Auth';
 import { paramsEnum as accountParams } from '../../domain/services/account/paramsEnum';
 import { typeEnum as tiposParticipante } from '../../domain/services/participante/typeEnum';
-
-import { config } from '../../config';
-import types from '../../constants/types';
-import { Mailer } from '../mailer';
-import * as chance from 'chance';
+import { Environment, AuthEnv } from '../environment/Environment';
 import * as Exceptions from '../../interfaces/rest/exceptions/ApiExceptions';
+import { Mailer } from '../mailer';
 import { KeycloakUserRepresentation } from './AuthTypes';
+
+import types from '../../constants/types';
 
 @injectable()
 class AuthDev implements Auth {
+  addRoleKc: (email: any, roles: any, pwd: any) => { };
   generateToken(body: any) {
     throw new Exceptions.NotImplementedException();
   }
   private db: Sequelize;
   private mailer: Mailer;
   private emailTemplates: any;
-  private settings = config.auth;
+  private settings: AuthEnv;
 
   private ec = {
     name: 'EC - It Lab',
@@ -56,13 +57,27 @@ class AuthDev implements Auth {
     resource_access: {},
   };
 
+  private retorno = (user, resolve, reject) => {
+    return jwt.sign(
+      user.sessionPayload,
+      this.settings.clientSecret,
+      { expiresIn: '24h' },
+      (error, token) => {
+        if (error) reject(error);
+        else resolve(token);
+      },
+    );
+  }
+
   constructor(
     @inject(types.Database) db: Sequelize,
+    @inject(types.Environment) config: Environment,
     @inject(types.MailerFactory) mailer: () => Mailer,
   ) {
     this.db = db;
     this.mailer = mailer();
     this.emailTemplates = this.mailer.emailTemplates;
+    this.settings = config.auth;
 
     this.ec.resource_access[this.settings.clientId] = { roles: [rolesEnum.ecFinanceiro] };
     this.fornecedor.resource_access[this.settings.clientId] = {
@@ -125,6 +140,12 @@ class AuthDev implements Auth {
     return Promise.resolve(id);
   }
 
+  recreateUser = (user) => {
+    const id = new chance().guid();
+    console.log(`Usuário  ${user.email} "${user.id}" recriado e atualizado no banco para ${id}`);
+    return Promise.resolve(id);
+  }
+
   updateUserData = () => Promise.resolve({});
 
   changeUserPassword = () => Promise.resolve({});
@@ -163,7 +184,7 @@ class AuthDev implements Auth {
   }
 
   authenticate = (body) => {
-    const action = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const user = this.users[body.email];
 
       if (!user) {
@@ -209,7 +230,7 @@ class AuthDev implements Auth {
         .then(() => {
           const sign = Promise.all([
             new Promise((resolve, reject) => {
-              const action = jwt.sign(
+              return jwt.sign(
                 user.kcPayload,
                 this.settings.publicKey,
                 { expiresIn: '24h' },
@@ -218,19 +239,9 @@ class AuthDev implements Auth {
                   else resolve(token);
                 },
               );
-              return action;
             }),
             new Promise((resolve, reject) => {
-              const action = jwt.sign(
-                user.sessionPayload,
-                this.settings.clientSecret,
-                { expiresIn: '24h' },
-                (error, token) => {
-                  if (error) reject(error);
-                  else resolve(token);
-                },
-              );
-              return action;
+              this.retorno(user, resolve, reject);
             }),
           ]);
 
@@ -245,7 +256,6 @@ class AuthDev implements Auth {
             .catch(error => reject(error));
         });
     });
-    return action;
   }
 
   refreshToken = (refreshToken) => {
@@ -264,7 +274,7 @@ class AuthDev implements Auth {
 
   generateSessionToken = (usuario, participante, impersonating) => {
     const getSessionToken = () => {
-      const action = new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         const user = this.users[usuario];
 
         if (!user) {
@@ -273,20 +283,10 @@ class AuthDev implements Auth {
         }
 
         return new Promise((resolve, reject) => {
-          const sign = jwt.sign(
-            user.sessionPayload,
-            this.settings.clientSecret,
-            { expiresIn: '24h' },
-            (error, token) => {
-              if (error) reject(error);
-              else resolve(token);
-            },
-          );
-          return sign;
+          this.retorno(user, resolve, reject);
         })
           .then(token => resolve({ sessionToken: token }));
       });
-      return action;
     };
 
     const generateSessionTokenDev = (emailUsuario, participante, impersonating) => {
@@ -454,6 +454,10 @@ class AuthDev implements Auth {
       id: userId,
       enabled: true
     };
+  }
+
+  getInfoUser = async (userId: string): Promise<KeycloakUserRepresentation> => {
+    return await this.db.entities.usuario.findByPk(userId);
   }
 
   putUser = async (user: KeycloakUserRepresentation): Promise<void> => {

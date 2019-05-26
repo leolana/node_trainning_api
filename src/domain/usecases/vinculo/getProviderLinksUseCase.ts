@@ -40,12 +40,6 @@ const getProviderLinksUseCase = (db, siscofWrapper) => (
       status: vinculoStatus,
     };
 
-    if (+vinculoStatus === +linkStatusEnum.reprovado) {
-      whereVinculo.status = {
-        $in: [+linkStatusEnum.reprovado, +linkStatusEnum.cancelado],
-      };
-    }
-
     if (dataCadastroInicio && dataCadastroFim) {
       whereVinculo.createdAt = {
         $between: [dataInicio, dataFim],

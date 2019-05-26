@@ -10,10 +10,11 @@ import { Mailer } from '../../../infra/mailer';
 import { rolesEnum as roles } from '../../../domain/services/auth/rolesEnum';
 import { AccountUseCases, getAccountUseCases } from '../../../domain/usecases/account';
 import { UsuarioUseCases, getUsuarioUseCases } from '../../../domain/usecases/usuario';
+import { Environment, MailerEnv } from '../../../infra/environment/Environment';
 
 import types from '../../../constants/types';
-import { config } from '../../../config';
 import * as Exceptions from '../exceptions/ApiExceptions';
+import { getDatatableOptionsService } from '../../../domain/services/datatable/getDatatableOptionsService';
 
 @injectable()
 class UsuariosController implements Controller {
@@ -21,7 +22,7 @@ class UsuariosController implements Controller {
   db: Sequelize;
   mailer: Mailer;
   emailTemplates: any;
-  settings = config.mailer;
+  settings: MailerEnv;
 
   accountUseCases: AccountUseCases;
   usuarioUseCases: UsuarioUseCases;
@@ -30,8 +31,10 @@ class UsuariosController implements Controller {
     @inject(types.Database) db: Sequelize,
     @inject(types.AuthFactory) auth: () => Auth,
     @inject(types.MailerFactory) mailer: () => Mailer,
-    @inject(types.Logger) private logger: LoggerInterface
+    @inject(types.Logger) private logger: LoggerInterface,
+    @inject(types.Environment) config: Environment
   ) {
+    this.settings = config.mailer;
     this.db = db;
     this.auth = auth();
     this.mailer = mailer();
@@ -51,13 +54,16 @@ class UsuariosController implements Controller {
       roles.fcAdministrador
     );
 
-    router.get('/usuarios', require, this.obterUsuarios);
-    router.get('/convites', require, this.obterConvites);
+    router.post('/usuarios', require, this.obterUsuarios);
+    router.post('/convites', require, this.obterConvites);
+    router.get('/usuario/detalhe/:id', require, this.obterResumoUsuario);
     router.post('/usuarios/convites', require, this.convidar);
     router.put('/usuarios', require, this.atualizar);
     router.post('/register', this.cadastrar);
+    router.put('/recriar-keycloak', this.recriarKeycloak);
     router.put('/usuarios/reenviar-convite', require, this.reenviarConvite);
     router.put('/usuario/status', require, this.atualizarStatus);
+    router.get('/info/keycloak/:id', require, this.obterInformacoesKeycloak);
 
     router.get(
       '/usuarios/participante/:idParticipante',
@@ -71,7 +77,7 @@ class UsuariosController implements Controller {
       this.obterConvitesDoParticipante
     );
 
-    router.get('/usuario/status', require, this.validateKeycloakUserStatus);
+    router.get('/checkUsername', require, this.checarUsername);
 
     return router;
   }
@@ -112,37 +118,72 @@ class UsuariosController implements Controller {
   }
 
   obterUsuarios = async (req: Request, res: Response, next: NextFunction) => {
-    const participanteId = +req.user.participante || 0;
-    const userStatus = +req.query.status;
 
-    return this.usuarioUseCases.listUsersUseCase(participanteId, userStatus)
-      .then((usuarios: any[]) => res.send(usuarios))
-      .catch(next);
+    try {
+      const participanteId = +req.user.participante || 0;
+      const filter = req.body;
+      const datatableOptions = getDatatableOptionsService(req.query);
+      const usuarios = await this.usuarioUseCases.listUsersUseCase(
+        participanteId,
+        filter,
+        datatableOptions
+      );
+
+      res.send(usuarios);
+
+    } catch (error) {
+      next(error);
+    }
+
   }
 
   obterConvites = async (req: Request, res: Response, next: NextFunction) => {
-    const participanteId = +req.user.participante || 0;
-    const userStatus = +req.query.status;
+    try {
+      const participanteId = +req.user.participante || 0;
+      const filter = req.body;
+      const datatableOptions = getDatatableOptionsService(req.query);
+      const convites = await this.usuarioUseCases.listInvitesUseCase(
+        participanteId,
+        filter,
+        datatableOptions
+      );
 
-    return this.usuarioUseCases.listInvitesUseCase(participanteId, userStatus)
-      .then((convites: any[]) => res.send(convites))
+      res.send(convites);
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  obterResumoUsuario = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.id;
+
+    return this.usuarioUseCases.listUserFromIdUseCase(userId)
+      .then(usuario => res.send(usuario))
       .catch(next);
   }
 
   convidar = async (req: Request, res: Response, next: NextFunction) => {
-    const participanteId = +req.user.participante || 0;
+    try {
+      const { nome, email, celular, participanteId } = req.body;
+      const loggedParticipanteId = +req.user.participante || 0;
 
-    return this.verificarPermissao(req)
-      .then(() => this.usuarioUseCases.inviteUserUseCase(
-        req.body.nome,
-        req.body.email,
-        req.body.celular,
+      const partId = +(participanteId || loggedParticipanteId);
+
+      await this.verificarPermissao(req);
+      await this.usuarioUseCases.inviteUserUseCase(
+        nome,
+        email,
+        celular,
         req.body.roles,
-        participanteId,
+        partId,
         req.user.email
-      ))
-      .then(() => res.end())
-      .catch(next);
+      );
+
+      res.end();
+    } catch (error) {
+      next(error);
+    }
   }
 
   cadastrar = async (req: Request, res: Response, next: NextFunction) => {
@@ -159,6 +200,15 @@ class UsuariosController implements Controller {
       .catch(next);
   }
 
+  recriarKeycloak = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.body;
+      await this.usuarioUseCases.recreateUserKeycloakUseCase(user, req.user.email);
+      res.end();
+
+    } catch (error) { return next(error); }
+  }
+
   atualizar = async (req: Request, res: Response, next: NextFunction) => {
     try {
       await this.verificarPermissao(req);
@@ -168,6 +218,10 @@ class UsuariosController implements Controller {
       if (!user) {
         throw new Exceptions.UserNotFoundException();
       }
+
+      const usernameValid = await this.usuarioUseCases.checkUsernameExistenceUseCase(userId, req.body.username);
+
+      if (usernameValid && usernameValid.length) { throw new Exceptions.UserAlreadyExistsException(); }
 
       await this.usuarioUseCases.updateUserStatusUseCase(userId, true, req.user.email);
 
@@ -183,7 +237,7 @@ class UsuariosController implements Controller {
       const rolesToRemove = oldRoles.filter(r => !newRoles.includes(r));
       const rolesToAdd = newRoles.filter(r => !oldRoles.includes(r));
 
-      await this.auth.changeUserRoles(user.id, rolesToRemove, rolesToAdd);
+      await this.auth.changeUserRoles(userId, rolesToRemove, rolesToAdd);
 
       res.end();
     } catch (error) {
@@ -221,6 +275,15 @@ class UsuariosController implements Controller {
       .catch(next);
   }
 
+  obterInformacoesKeycloak = async (req: Request, res: Response, next: NextFunction) => {
+    const idUsuario = req.params.id;
+
+    return this.usuarioUseCases
+      .getInfoKeycloakUseCase(idUsuario)
+      .then(user => res.send(user))
+      .catch(next);
+  }
+
   obterConvitesDoParticipante = async (req: Request, res: Response, next: NextFunction) => {
     const idParticipante = +req.params.idParticipante;
 
@@ -228,6 +291,19 @@ class UsuariosController implements Controller {
       .listInvitesFromParticipantUseCase(idParticipante)
       .then(invites => res.send(invites))
       .catch(next);
+  }
+
+  checarUsername = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.query.id;
+      const checkUsername = req.query.username;
+
+      const usernames = await this.usuarioUseCases.
+        checkUsernameExistenceUseCase(userId, checkUsername);
+      res.send(usernames);
+    } catch (error) {
+      return next(error);
+    }
   }
 
   validateKeycloakUserStatus = async (req: Request, res: Response, next: NextFunction) => {

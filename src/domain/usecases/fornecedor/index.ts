@@ -20,7 +20,7 @@ export default (
   fileStorage,
   logger
 ) => ({
-  add: addUseCase(db, siscofWrapper, auth, mailer, mailerSettings, fileStorage),
+  add: addUseCase(db, siscofWrapper, auth, mailer, mailerSettings, fileStorage, logger),
   identifier: identifier(db),
   details: details(db),
   edit: editUsecase(db, siscofWrapper, auth, fileStorage),

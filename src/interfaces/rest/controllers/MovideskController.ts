@@ -3,15 +3,14 @@ import { Request } from 'express-request';
 import { injectable, inject } from 'inversify';
 import { Sequelize } from 'sequelize-database';
 
-import { LoggerInterface } from '../../../infra/logging';
 import { PersonAPI } from '../../../infra/movidesk';
-import Auth from '../../../infra/auth/Auth';
-
+import { LoggerInterface } from '../../../infra/logging';
 import { typeEnum as tiposParticipante } from '../../../domain/services/participante/typeEnum';
 import { MovideskUseCases, getMovideskUseCases } from '../../../domain/usecases/movidesk';
-import types from '../../../constants/types';
-import { config } from '../../../config';
+
 import Controller from '../Controller';
+import Auth from '../../../infra/auth/Auth';
+import types from '../../../constants/types';
 
 @injectable()
 class MovideskController implements Controller {
@@ -19,50 +18,70 @@ class MovideskController implements Controller {
   usecases: MovideskUseCases;
 
   constructor(
-    @inject(types.AuthFactory) auth: () => Auth,
-    @inject(types.PersonAPIFactory) personAPI: () => PersonAPI,
     @inject(types.Database) private db: Sequelize,
     @inject(types.Logger) private logger: LoggerInterface,
+
+    @inject(types.AuthFactory) auth: () => Auth,
+    @inject(types.PersonAPIFactory) personAPI: () => PersonAPI
   ) {
+
     this.auth = auth();
-    this.usecases = getMovideskUseCases(this.db, personAPI(), this.logger);
+
+    this.usecases = getMovideskUseCases(
+      this.db,
+      personAPI(),
+      this.logger
+    );
   }
 
   get router(): Router {
     const router = Router();
-    router.get('/movidesk-chatbox-token', this.obterChatboxToken);
-    router.post('/movidesk-integration', this.forceMovideskIntegration);
+    router.get('/movidesk-chatbox-token', this.checkParticipantAccessToChatbox);
+    router.post('/movidesk-integration', this.forceMovideskPersonIntegration);
     return router;
   }
 
-  obterChatboxToken = async (req: Request, res: Response, next: NextFunction) => {
+  checkParticipantAccessToChatbox = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let token: string = null;
+      const participanteId = +req.user.participante;
+      const isParticipante = this.auth.isParticipante(
+        req,
+        tiposParticipante.estabelecimento,
+        tiposParticipante.fornecedor
+      );
+      const userEmail = req.user.email;
+      const userName = req.user.name;
 
-      if (this.auth.isParticipante(req, tiposParticipante.estabelecimento, tiposParticipante.fornecedor)) {
-        const participanteId = +req.user.participante;
-        const integrado = await this.usecases.checkParticipantMovideskIntegrationUseCase(participanteId);
+      const result = await this.usecases.checkParticipantAccessToChatbox(
+        participanteId,
+        isParticipante,
+        userEmail,
+        userName
+      );
 
-        if (integrado) {
-          token = config.movidesk.token;
-        }
-      }
+      res.send(result);
 
-      return res.send({ token });
-    } catch (e) {
-      return next(e);
+    } catch (error) {
+      next(error);
     }
   }
 
-  forceMovideskIntegration = async (req: Request, res: Response, next: NextFunction) => {
-    const participanteId = +req.body.participanteId;
-    const user = req.user.email;
-
+  forceMovideskPersonIntegration = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await this.usecases.integrateWithMovideskUseCase(participanteId, user);
-      return res.end();
-    } catch (e) {
-      return next(e);
+      const participanteId = +req.body.participanteId;
+      const userEmail = req.user.email;
+      const throwErrors = true;
+
+      await this.usecases.forceMovideskPersonIntegration(
+        participanteId,
+        userEmail,
+        throwErrors
+      );
+
+      res.end();
+
+    } catch (error) {
+      next(error);
     }
   }
 }

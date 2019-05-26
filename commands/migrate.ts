@@ -1,6 +1,5 @@
 import chalk from 'chalk';
-
-import database from '../src/infra/database';
+import database from './database';
 
 const handleError = (error) => {
   console.error(error);
@@ -11,7 +10,7 @@ const run = async () => {
   const log = console.log;
 
   // Status logging to print out the amount of factories and seeds.
-  log('🔎 ', chalk.gray.underline.bold('Run migrations'));
+  log('🔎 ', chalk.green.underline.bold('Run migrations'));
 
   // Get database connection and pass it to the seeder
   try {
@@ -20,7 +19,7 @@ const run = async () => {
     return handleError(error);
   }
 
-  log('\n👍 ', chalk.gray.underline('Database Migrate Finished'));
+  log('\n👍 ', chalk.green.underline('Database Migrate Finished'));
 
   return;
 };

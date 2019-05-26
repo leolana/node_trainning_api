@@ -4,28 +4,31 @@ import { injectable, inject } from 'inversify';
 import router from './router';
 import { LoggerInterface } from '../logging/LoggerInterface';
 import { banner } from '../console/Banner';
+import { Environment } from '../../infra/environment/Environment';
 
-import { config } from '../../config';
 import types from '../../constants/types';
 
 @injectable()
 class Server {
   private express: express.Express;
   private logger: LoggerInterface;
+  private config: Environment;
 
   constructor(
     @inject(types.Logger) logger: LoggerInterface,
+    @inject(types.Environment) config: Environment,
   ) {
     this.logger = logger;
     this.express = express();
 
     this.express.use(router());
+    this.config = config;
   }
 
   start() {
     return new Promise((resolve) => {
       this.express
-        .listen(config.app.port, () => {
+        .listen(this.config.app.port, () => {
           banner(this.logger);
           resolve();
         });

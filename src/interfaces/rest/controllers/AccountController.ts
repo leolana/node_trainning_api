@@ -9,8 +9,8 @@ import { LoggerInterface } from '../../../infra/logging';
 import { Mailer } from '../../../infra/mailer';
 import { getAccountUseCases, AccountUseCases } from '../../../domain/usecases/account';
 import { rolesEnum as roles } from '../../../domain/services/auth/rolesEnum';
+import { Environment, AuthEnv } from '../../../infra/environment/Environment';
 
-import { config } from '../../../config';
 import types from '../../../constants/types';
 import { LoginFailedException } from '../exceptions/ApiExceptions';
 
@@ -21,13 +21,14 @@ class AccountController implements Controller {
   logger: LoggerInterface;
   mailer: Mailer;
   emailTemplates: any;
-  settings: any;
+  settings: AuthEnv;
   useCases: AccountUseCases;
 
   constructor(
     @inject(types.AuthFactory) auth: () => Auth,
     @inject(types.Database) db: Sequelize,
     @inject(types.Logger) logger: LoggerInterface,
+    @inject(types.Environment) config: Environment,
     @inject(types.MailerFactory) mailer: () => Mailer
   ) {
     this.auth = auth();
@@ -62,6 +63,8 @@ class AccountController implements Controller {
       this.auth.require(roles.boAdministrador, roles.boOperacoes),
       this.impersonate,
     );
+    router.post('/check-memberships', this.checkMemberships);
+    router.post('/create-membership', this.createMembership);
 
     return router;
   }
@@ -111,6 +114,29 @@ class AccountController implements Controller {
         this.logger.error(error);
         return next(error);
       });
+  }
+
+  checkMemberships = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { emails } = req.body;
+      const participantes = await this.useCases.checkMembershipsUseCase(emails);
+      res.send(participantes);
+    } catch (error) {
+      this.logger
+        .info('Não foi possível trazer os memberships dos emails');
+      this.logger.error(error);
+      return next(error);
+    }
+  }
+
+  createMembership = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { participanteId, usuarioId, role } = req.body;
+      await this.useCases.createMembershipUseCase(participanteId, usuarioId, role);
+      res.end();
+    } catch (error) {
+      next(error);
+    }
   }
 
   initiateSession = async (req: Request, res: Response, next: NextFunction): Promise<any> => {

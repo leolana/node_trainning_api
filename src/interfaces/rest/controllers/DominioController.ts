@@ -9,9 +9,9 @@ import { LoggerInterface } from '../../../infra/logging';
 import { InternalApis } from '../../../infra/internalApis';
 import { Mailer } from '../../../infra/mailer';
 import tiposPessoa from '../../../domain/entities/tiposPessoa';
+import { Environment, MailerEnv } from '../../../infra/environment/Environment';
 
 import types from '../../../constants/types';
-import { config } from '../../../config';
 
 @injectable()
 class DominioController implements Controller {
@@ -21,13 +21,14 @@ class DominioController implements Controller {
   internalApis: InternalApis;
   mailer: Mailer;
   emailTemplates: any;
-  mailerSettings: any;
+  mailerSettings: MailerEnv;
 
   constructor(
     @inject(types.Database) db: Sequelize,
     @inject(types.Logger) logger: LoggerInterface,
     @inject(types.InternalApisFactory) internalApis: () => InternalApis,
     @inject(types.MailerFactory) mailer: () => Mailer,
+    @inject(types.Environment) config: Environment,
   ) {
     this.db = db;
     this.logger = logger;

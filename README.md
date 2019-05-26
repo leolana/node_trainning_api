@@ -3,9 +3,6 @@
 Alpe API  **Portal Financeiro** developed in **[Node.js][node]** with database 
 **[Postgres][postgres]**.
 
-<p align="center"><a href="https://www.postgresql.org"><img src="https://www.postgresql.org/media/img/about/press/elephant.png" height="24" align="top" /></a> 
-<a href="https://www.docker.com"><img src="https://camo.githubusercontent.com/fa6d5c12609ed8a3ba1163b96f9e9979b8f59b0d/687474703a2f2f7765732e696f2f566663732f636f6e74656e74" height="24" align="top" /></a> 
-<a href="https://nodejs.org/"><img src="https://nodejs.org/static/images/logos/nodejs-new-pantone-black.png" height="24" align="top" /></a> </p>
 
 ---
 
@@ -198,9 +195,8 @@ More info about releases you find in [Changelog](./docs/CHANGELOG.md)
 
 ## ❯ Related Projects
 
-* [Front-End](https://github.com/ITLAB-BR/alpe-bko) —   Front-End repository (www)
-* [Integration](https://github.com/ITLAB-BR/alpe-api-integracao) — Integration gateway
-* [Documentation](https://github.com/ITLAB-BR/alpe) — Documentation / Backlog / Sprints
+* [Front-End](https://bitbucket.org/timefinanceiro/alpe-credenciamento-front/src/stable/) —   Front-End repository (www
+* [Integration](https://bitbucket.org/timefinanceiro/alpe-integracao-erp/src/develop/) — Integration gateway
 * [Deply (GMUD)](https://github.com/ITLAB-BR/alpe-api/docs/DEPLOY.md) — Deploy GMUD
 
 ---

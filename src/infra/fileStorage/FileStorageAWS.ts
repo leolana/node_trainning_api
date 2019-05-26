@@ -1,15 +1,18 @@
 import * as AWS from 'aws-sdk';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 
 import FileStorage from './FileStorage';
+import { Environment, StorageEnv } from '../environment/Environment';
 
-import { config } from '../../config';
+import types from '../../constants/types';
 
 @injectable()
 class FileStorageAWS implements FileStorage {
-  private settings: any;
+  private settings: StorageEnv;
 
-  constructor() {
+  constructor(
+    @inject(types.Environment) config: Environment
+  ) {
     this.settings = config.storage;
   }
 

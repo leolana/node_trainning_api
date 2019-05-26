@@ -1,7 +1,8 @@
+import { Sequelize } from 'sequelize-database';
 import { DateTime } from 'luxon';
 import deformatDocument from '../../services/credenciamento/deformatDocument';
-import { Sequelize } from 'sequelize-database';
-import ParticipanteIntegracaoTipo from '../../../domain/entities/ParticipanteIntegracaoTipo';
+import ParticipanteIntegracaoTipo from '../../entities/ParticipanteIntegracaoTipo';
+import ParticipanteIntegracaoStatus from '../../entities/ParticipanteIntegracaoStatus';
 
 const search = (db: Sequelize) => (options) => {
   let collection = null;
@@ -81,6 +82,9 @@ const search = (db: Sequelize) => (options) => {
           model: db.entities.participanteIntegracao,
           as: 'integracoes',
           required: false,
+          where: {
+            status: ParticipanteIntegracaoStatus.concluido
+          }
         }]
       }]
     };

@@ -1,15 +1,19 @@
 import * as request from 'request-promise-native';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 
-import { config } from '../../config';
 import InternalApis from './InternalApis';
+import { Environment, InternalApiEnv } from '../environment/Environment';
 import { CepNotFoundException } from '../../interfaces/rest/exceptions/ApiExceptions';
+
+import types from '../../constants/types';
 
 @injectable()
 class InternalApisProd implements InternalApis {
-  private settings: any;
+  private settings: InternalApiEnv;
 
-  constructor() {
+  constructor(
+    @inject(types.Environment) config: Environment
+  ) {
     this.settings = config.internalApis;
   }
 

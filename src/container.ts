@@ -1,9 +1,9 @@
 import { Container, interfaces } from 'inversify';
 import { Sequelize } from 'sequelize-database';
 
-import database from './infra/database';
+import { DatabaseFactory } from './infra/database';
 import Application from './Application';
-import logging, { LoggerInterface } from './infra/logging';
+import { LoggerInterface, LoggerFactory } from './infra/logging';
 import Server from './infra/api/Server';
 
 import {
@@ -21,12 +21,13 @@ import { Mailer, MailerAWS, MailerDev, MailerFactory } from './infra/mailer';
 import { Auth, AuthDev, AuthProd, AuthFactory } from './infra/auth';
 import { FileStorage, FileStorageAWS, FileStorageDev, FileStorageFactory } from './infra/fileStorage';
 import { InternalApis, InternalApisDev, InternalApisProd } from './infra/internalApis';
+import EnvironmentFactory from './infra/environment/EnvironmentFactory';
 import { PersonAPI, PersonAPIDev, PersonAPIProd } from './infra/movidesk';
+import { Environment } from './infra/environment/Environment';
 
 import CessionService from './domain/services/CessionService';
 import VinculoService from './domain/services/VinculoService';
 
-import { config } from './config';
 import types from './constants/types';
 import InternalApisFactory from './infra/internalApis/InternalApisFactory';
 import PersonAPIFactory from './infra/movidesk/PersonAPIFactory';
@@ -34,8 +35,16 @@ import SiscofConnectorFactory from './infra/siscof/SiscofConnectorFactory';
 
 const container = new Container();
 
-container.bind<Sequelize>(types.Database).toDynamicValue(() => database).inRequestScope();
-container.bind<LoggerInterface>(types.Logger).toConstantValue(logging);
+container.bind<Sequelize>(types.Database).toDynamicValue((context: interfaces.Context) => {
+  const factory = new DatabaseFactory(context);
+
+  return factory.create();
+}).inRequestScope();
+container.bind<LoggerInterface>(types.Logger).toDynamicValue((context: interfaces.Context) => {
+  const factory = new LoggerFactory(context);
+
+  return factory.create();
+}).inSingletonScope();
 container.bind<Application>(types.Application).to(Application);
 container.bind<Server>(types.Server).to(Server);
 
@@ -71,6 +80,12 @@ container
     };
   });
 
+container.bind<Environment>(types.Environment).toDynamicValue(() => {
+  const factory = new EnvironmentFactory();
+
+  return factory.create();
+}).inSingletonScope();
+
 container.bind<InternalApisDev>(types.InternalApisDev).to(InternalApisDev);
 container.bind<InternalApisProd>(types.InternalApisProd).to(InternalApisProd);
 container
@@ -96,10 +111,9 @@ container
   });
 
 container.bind<SiscofCmd>(types.SiscofCmd).to(SiscofCmd);
-container.bind<SiscofDb>(types.SiscofDb).toDynamicValue(() => {
-  return config.isDevelopment && config.siscof.enableMock
-    ? new SiscofDbBootstrapper().connectDev()
-    : new SiscofDbBootstrapper().connectProd();
+container.bind<SiscofDb>(types.SiscofDb).toDynamicValue((context: interfaces.Context) => {
+  const siscofDbBootstrapper = new SiscofDbBootstrapper(context);
+  return siscofDbBootstrapper.create();
 }).inSingletonScope();
 
 container.bind<SiscofConnectorDev>(types.SiscofConnectorDev).to(SiscofConnectorDev);

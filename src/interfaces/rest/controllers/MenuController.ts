@@ -9,19 +9,20 @@ import participanteVinculoStatus from '../../../domain/entities/participanteVinc
 import cessaoStatus from '../../../domain/entities/cessaoStatus';
 import participateNominationSourceEnum from '../../../domain/entities/participateNominationSourceEnum';
 import { rolesEnum } from '../../../domain/services/auth/rolesEnum';
+import { Environment, AuthEnv } from '../../../infra/environment/Environment';
 
 import types from '../../../constants/types';
-import { config } from '../../../config';
 
 @injectable()
 class MenuController implements Controller {
   db: Sequelize;
   logger: LoggerInterface;
-  authSettings: any;
+  authSettings: AuthEnv;
 
   constructor(
     @inject(types.Database) db: Sequelize,
     @inject(types.Logger) logger: LoggerInterface,
+    @inject(types.Environment) config: Environment,
   ) {
     this.db = db;
     this.logger = logger;

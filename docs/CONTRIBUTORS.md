@@ -4,14 +4,16 @@ Below is the team of developers of this project.
 
 Thanks to the following people who have submitted major pull requests:
 
-- [@leolana](https://github.com/leolana) - Tech Leader / Team Leader
+- [@leolanaitlab](https://bitbucket.org/leolanaitlab) - Tech Leader / Team Leader
 - [@eduardomoras](https://github.com/eduardomoras) - Requirements Analyst
 - [@viniciustodesco](https://github.com/viniciustodesco) - Dev
-- [@gabgla](https://github.com/gabgla) - Dev
-- [@WashingtonGuedes](https://github.com/WashingtonGuedes) - Dev
-- [@amandadlazaro](https://github.com/amandadlazaro) - Dev
+- [@gabgla](https://bitbucket.org/gabgla) - Dev
+- [@eusouowashington](https://bitbucket.org/eusouowashington) - Dev
+- [@amanda_dlazaro](https://bitbucket.org/amanda_dlazaro) - Dev
 - [@eduardosilva](https://github.com/eduardosilva) - Dev
-- [@mathrodri](https://github.com/mathrodri) - Dev
+- [@mathrodri](https://bitbucket.org/mathrodri) - Dev
+- [@monica-santos](https://bitbucket.org/monica-santos) - Dev
+- [@julio-saldanha](https://bitbucket.org/julio-saldanha) - Dev
 - [@Rafaazzo](https://github.com/Rafaazzo) - QA
 
 ---

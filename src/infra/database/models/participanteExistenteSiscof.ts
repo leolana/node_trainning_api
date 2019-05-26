@@ -1,7 +1,7 @@
 // tslint:disable:no-magic-numbers
 import { Sequelize, DataTypes } from 'sequelize-database';
 
-const participanteExistenteSiscofModel = (sequelize: Sequelize, dataTypes: DataTypes)  => {
+const participanteExistenteSiscofModel = (sequelize: Sequelize, dataTypes: DataTypes) => {
 
   const participanteExistenteSiscof = sequelize.define(
     'participanteExistenteSiscof',
@@ -13,7 +13,7 @@ const participanteExistenteSiscofModel = (sequelize: Sequelize, dataTypes: DataT
       documento: {
         type: dataTypes.STRING(15),
         allowNull: true,
-      },
+      }
     }
   );
 

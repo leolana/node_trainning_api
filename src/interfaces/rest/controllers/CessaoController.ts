@@ -17,10 +17,10 @@ import participanteVinculoStatus from '../../../domain/entities/participanteVinc
 import { typeEnum } from '../../../domain/services/participante/typeEnum';
 import SiscofWrapper from '../../../infra/siscof/SiscofWrapper';
 import { rolesEnum as roles } from '../../../domain/services/auth/rolesEnum';
+import { Environment, MailerEnv } from '../../../infra/environment/Environment';
+import CessionService from '../../../domain/services/CessionService';
 
 import types from '../../../constants/types';
-import { config } from '../../../config';
-import CessionService from '../../../domain/services/CessionService';
 
 @injectable()
 class CessaoController implements Controller {
@@ -29,13 +29,14 @@ class CessaoController implements Controller {
   emailTemplates: any;
   cessionService: CessionService;
   siscofWrapper: SiscofWrapper;
-  mailerConfig: any;
+  mailerConfig: MailerEnv;
   auth: Auth;
 
   constructor(
     @inject(types.Database) db: Sequelize,
     @inject(types.AuthFactory) auth: () => Auth,
     @inject(types.MailerFactory) mailer: () => Mailer,
+    @inject(types.Environment) config: Environment,
     @inject(types.SiscofWrapper) siscofWrapper: SiscofWrapper,
     @inject(types.CessionService) cessionService: CessionService,
   ) {

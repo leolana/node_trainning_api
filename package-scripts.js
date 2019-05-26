@@ -83,6 +83,10 @@ module.exports = {
      * Runs TSLint over your project
      */
     lint: {
+      watch: {
+        script: watch('src', tslint('./src/**/*.ts')),
+        hiddenFromHelp: true,
+      },
       script: tslint('./src/**/*.ts'),
       hiddenFromHelp: true,
     },
@@ -142,11 +146,12 @@ module.exports = {
         hiddenFromHelp: true,
       },
     },
-        /**
-     * These run various kinds of tests. Default is unit.
-     */
+    /**
+    * These run various kinds of tests. Default is unit.
+    */
     test: {
       default: 'nps test.unit',
+      coverage: 'cross-env NODE_ENV=testing jest -i --coverage --runInBand',
       unit: {
         default: {
           script: series('nps banner.testUnit', 'nps test.unit.pretest', 'nps test.unit.run'),
@@ -157,15 +162,15 @@ module.exports = {
           hiddenFromHelp: true,
         },
         run: {
-          script: 'cross-env NODE_ENV=testing jest --testPathPattern=unit',
+          script: 'cross-env NODE_ENV=testing jest --testPathPattern=unit --maxWorkers=2',
           hiddenFromHelp: true,
         },
         verbose: {
-          script: 'nps "test --verbose"',
+          script: series('nps banner.testUnit', 'nps test.unit.pretest', 'nps "test.unit.run --verbose"'),
           hiddenFromHelp: true,
         },
         coverage: {
-          script: 'nps "test --coverage"',
+          script: series('nps banner.testUnit', 'nps test.unit.pretest', 'nps "test.unit.run --coverage --runInBand"'),
           hiddenFromHelp: true,
         },
       },
@@ -184,11 +189,11 @@ module.exports = {
           hiddenFromHelp: true,
         },
         verbose: {
-          script: 'nps "test --verbose"',
+          script: series('nps banner.testIntegration', 'nps test.integration.pretest', 'nps "test.integration.run --verbose"'),
           hiddenFromHelp: true,
         },
         coverage: {
-          script: 'nps "test --coverage"',
+          script: series('nps banner.testIntegration', 'nps test.integration.pretest', 'nps "test.integration.run --coverage --runInBand"'),
           hiddenFromHelp: true,
         },
       },
@@ -207,14 +212,38 @@ module.exports = {
           hiddenFromHelp: true,
         },
         verbose: {
-          script: 'nps "test --verbose"',
+          script: series('nps banner.testE2E', 'nps test.e2e.pretest', 'nps "test.e2e.run --verbose"'),
           hiddenFromHelp: true,
         },
         coverage: {
-          script: 'nps "test --coverage"',
+          script: series('nps banner.testE2E', 'nps test.e2e.pretest', 'nps "test.e2e.run --coverage --runInBand"'),
           hiddenFromHelp: true,
         },
       },
+    },
+    /**
+    * Manage git secrets. Default is to check, run install at least once before
+    * running it.
+    */
+    secrets: {
+      install: {
+        script: 'git secrets --register-aws',
+        hiddenFromHelp: true
+      },
+      default: {
+        script: 'git secrets --scan --cached --untracked',
+        hiddenFromHelp: true
+      }
+    },
+    /**
+    * Used by precommit hook.
+    */
+    precommit: {
+      script: series(
+        'nps secrets',
+        'nps lint'
+      ),
+      hiddenFromHelp: true
     },
     /**
      * Database scripts"
@@ -325,4 +354,8 @@ function runFast(path) {
 
 function tslint(path) {
   return `tslint -c ./tslint.json ${path} --format stylish`;
+}
+
+function watch(what, cmd) {
+  return `nodemon --watch ${what} ${cmd}`
 }

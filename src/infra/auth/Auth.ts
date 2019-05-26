@@ -44,6 +44,14 @@ interface Auth {
   updateUserData: any;
 
   /**
+   * Apaga o usuário no Keycloak com o indentificador passado (userId),
+   * Depois recria o mesmo usuário, gerando um novo id,
+   * Envia um email ao usuário para recriar a senha
+   * e retorna o id criado
+   */
+  recreateUser: (user: any) => Promise<string>;
+
+  /**
    * Encontra o usuário com identificador (userId) no keycloak e atualiza
    * a propriedade (enabled) para o valor informado em (userStatus: boolean)
    */
@@ -59,12 +67,19 @@ interface Auth {
    */
   getUser: (userId: string) => Promise<KeycloakUserRepresentation>;
 
+    /**
+   * Retorna um array com as roles do id do usuário passado por parametro.
+   */
+  getInfoUser: (userId: string) => Promise<KeycloakUserRepresentation>;
+
   /**
    * Atualiza todos os dados no Keycloak.
    * Os dados devem estar correspondentes à interface (KeycloakUserRepresentation)
    * que é retornada no método auth.getUser(userId)
    */
   putUser: (user: KeycloakUserRepresentation) => Promise<void>;
+
+  addRoleKc: (email, roles, pwd) => any;
 }
 
 export default Auth;

@@ -9,5 +9,6 @@ export const unless = {
     '/siscofPing',
     '/siscofDate',
     '/health-check',
+    '/health-kc',
   ],
 };

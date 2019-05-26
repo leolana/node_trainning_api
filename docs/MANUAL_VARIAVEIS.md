@@ -469,9 +469,9 @@ Manual das variáveis de ambiente da api de securitização.
 **Format:** token
 
 **Possible values:**
-*token:* 04AF3396299647D7ACA44BEBE0931CED
+*token:* dca7ac49-71a3-45dc-a5f5-3317e78ec587
 
-**Example:** `ALPE_MOVIDESK_TOKEN: '04AF3396299647D7ACA44BEBE0931CED'`
+**Example:** `ALPE_MOVIDESK_TOKEN: 'dca7ac49-71a3-45dc-a5f5-3317e78ec587'`
 
 | Type | Default | Required | Crypto |
 |:---:|:---:|:---:|:---:|

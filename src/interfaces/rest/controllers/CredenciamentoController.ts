@@ -14,10 +14,11 @@ import { Mailer } from '../../../infra/mailer';
 import { SiscofWrapper } from '../../../infra/siscof';
 import { PersonAPI } from '../../../infra/movidesk/PersonAPI';
 import { rolesEnum as roles } from '../../../domain/services/auth/rolesEnum';
-import types from '../../../constants/types';
-import { config } from '../../../config';
 import deformatDocument from '../../../domain/services/credenciamento/deformatDocument';
 import { MovideskUseCases, getMovideskUseCases } from '../../../domain/usecases/movidesk';
+import { Environment, MailerEnv } from '../../../infra/environment/Environment';
+
+import types from '../../../constants/types';
 
 @injectable()
 class CredenciamentoController implements Controller {
@@ -26,8 +27,7 @@ class CredenciamentoController implements Controller {
   mailer: Mailer;
   usecases: CredenciamentoUseCases;
   movideskUsecases: MovideskUseCases;
-
-  mailerSettings = config.mailer;
+  mailerSettings: MailerEnv;
   storage = multer.memoryStorage();
   upload = multer({ storage: this.storage });
 
@@ -38,15 +38,29 @@ class CredenciamentoController implements Controller {
     @inject(types.FileStorageFactory) fileStorage: () => FileStorage,
     @inject(types.SiscofWrapper) private siscofWrapper: SiscofWrapper,
     @inject(types.MailerFactory) mailer: () => Mailer,
+    @inject(types.Environment) config: Environment,
     @inject(types.PersonAPIFactory) personApi: () => PersonAPI,
   ) {
+    this.mailerSettings = config.mailer;
     this.auth = auth();
     this.fileStorage = fileStorage();
     this.mailer = mailer();
+
     this.usecases = getCredenciamentoUseCases(
-      this.db, this.auth, this.fileStorage, this.siscofWrapper, this.mailer, this.mailerSettings
+      this.db,
+      this.auth,
+      this.fileStorage,
+      this.siscofWrapper,
+      this.mailer,
+      this.mailerSettings,
+      this.logger
     );
-    this.movideskUsecases = getMovideskUseCases(this.db, personApi(), this.logger);
+
+    this.movideskUsecases = getMovideskUseCases(
+      this.db,
+      personApi(),
+      this.logger
+    );
   }
 
   get router(): Router {
@@ -175,27 +189,24 @@ class CredenciamentoController implements Controller {
   }
 
   mutate = async (req: Request, res: Response, next: NextFunction) => {
-    const { files } = req;
-    const user = req.user.email;
-    const data = JSON.parse(req.body.data);
+    try {
+      const { files } = req;
+      const user = req.user.email;
+      const data = JSON.parse(req.body.data);
 
-    const { documento } = data.dadosCadastrais;
+      const { documento } = data.dadosCadastrais;
 
-    const action = (): any => {
       if (data.dadosCadastrais.id) {
         const unchangedFiles = req.body.unchangedFiles && JSON.parse(req.body.unchangedFiles);
-        return this.usecases.edit(data, files, documento, user, unchangedFiles);
+        await this.usecases.edit(data, files, documento, user, unchangedFiles);
+      } else {
+        await this.usecases.addAccreditation(data, files, documento, user);
       }
 
-      return this.usecases.add(data, files, documento, user);
-    };
-
-    return action()
-      .then(() => res.end())
-      .catch((err) => {
-        this.logger.error(err);
-        return next(err);
-      });
+      res.end();
+    } catch (error) {
+      next(error);
+    }
   }
 
   editAnalyze = async (req: Request, res: Response, next: NextFunction) => {
@@ -249,7 +260,7 @@ class CredenciamentoController implements Controller {
     return this.usecases.canApprove(credenciamentoId)
       .then(() => this.usecases.approve(credenciamentoId, user))
       .then((credenciamento: any) => this.movideskUsecases
-        .integrateWithMovideskUseCase(credenciamento.participanteId, user, false)
+        .forceMovideskPersonIntegration(credenciamento.participanteId, user, false)
         .then(() => res.send(credenciamento))
       )
       .catch(next);
