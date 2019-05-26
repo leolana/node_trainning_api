@@ -1,7 +1,7 @@
 {
-   "name": "alpe-api",
-   "version": "2.2.0",
-   "description": "Api do portal Financeiro (credenciamento e securitização)",
+   "name": "alpepay-sec-api",
+   "version": "0.1.0",
+   "description": "Api de securitização da AlpePay",
    "main": "src/index.ts",
    "scripts": {
       "start": "nps",
