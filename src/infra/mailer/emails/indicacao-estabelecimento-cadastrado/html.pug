@@ -1,0 +1,12 @@
+extends ./../layout.pug
+
+block title
+    | Indicação de EC
+    
+block content
+    p Prezados,
+    br
+    p
+        | O fornecedor #{fornecedor} indicou seu estabelecimento para realizar cessão de recebíveis pela Alpe.
+    p Acesse o link para consultar a fornecedor:
+    a(href=linkFornecedoresCessao) #{linkFornecedoresCessao}

@@ -1,0 +1,13 @@
+extends ./../layout.pug
+
+block title
+    | Indicação de EC
+    
+block content
+    p Prezados,
+    br
+    p 
+        | O estabelecimento #{estabelecimento} foi indicado com sucesso para realizar cessão de recebíveis.
+    p Solicite cessão em:
+    a(href=linkSolicitarCessao) #{linkSolicitarCessao}
+

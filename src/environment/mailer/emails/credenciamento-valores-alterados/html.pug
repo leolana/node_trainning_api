@@ -1,0 +1,20 @@
+extends ./../layout.pug
+
+block title
+    | Alteração de estabelecimento
+    
+block content
+    p Prezados,
+    br
+    p
+        | O estabelecimento #{estabelecimento} foi modificado no Portal Alpe pelo usuário #{user}.
+        | Esta modificação alterou os 
+        if taxa
+            | valores de taxa 
+            if bancario
+                | e os 
+        if bancario
+            | dados bancários 
+        | deste estabelecimento.
+    p Acesse o link para consultar:
+    a(href=linkCredenciamento) #{linkCredenciamento}

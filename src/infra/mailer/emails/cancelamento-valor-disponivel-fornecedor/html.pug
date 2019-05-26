@@ -1,0 +1,13 @@
+extends ./../layout.pug
+
+block title
+    | Valor disponível
+    
+block content
+    p Prezados,
+    br
+    p 
+        | A informação de valor disponível para cessão foi cancelada para o fornecedor #{fornecedor} com sucesso. 
+    p Para alterar essa condição acesse:
+    a(href=linkAlteracaoValorDisponivel) #{linkAlteracaoValorDisponivel}
+

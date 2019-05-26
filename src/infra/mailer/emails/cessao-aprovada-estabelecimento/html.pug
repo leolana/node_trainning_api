@@ -1,0 +1,12 @@
+extends ./../layout.pug
+
+block title
+    | Cessão aprovada
+    
+block content
+    p Prezados,
+    br
+    p
+        | A cessão de recebíveis (cód. #{codigoCessao}) para a #{fornecedor} foi realizada com sucesso.
+    p Para consultar as suas cessões de recebíveis acesse:
+    a(href=linkCessoesRealizadas) #{linkCessoesRealizadas}

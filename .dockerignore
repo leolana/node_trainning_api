@@ -1,0 +1,6 @@
+.dockerignore
+.git
+*Dockerfile*
+node_modules
+docker-compose.yml
+.scannerwork

@@ -1,0 +1,13 @@
+extends ./../layout.pug
+
+block title
+    | Indicação de fornecedor
+
+block content
+    p Prezados #{estabelecimento},
+    br
+    p
+        | O fornecedor CNPJ: #{fornecedor} foi indicado com sucesso.
+        | Por gentileza, aguarde o cadastramento deste fornecedor para realizar a Cessão de Recebíveis pela ALPE.
+    p Acompanhe o status da sua indicação em:
+    a(href=linkCessao) #{linkCessao}

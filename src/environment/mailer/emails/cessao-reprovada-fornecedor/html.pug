@@ -1,0 +1,12 @@
+extends ./../layout.pug
+
+block title
+    | Cessão recusada
+    
+block content
+    p Prezados,
+    br
+    p
+        | A cessão (cód. #{codigoCessao}) foi recusada por #{estabelecimento}.
+    p Para consultar detalhes acesse:
+    a(href=linkCessoesRealizadas) #{linkCessoesRealizadas}

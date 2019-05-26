@@ -1,0 +1,16 @@
+module.exports = {
+  documentoNaoCadastrado: 0,
+  credenciamentoProposta: 1,
+  credenciamentoPendente: 2,
+  credenciamentoEmAnalise: 3,
+  credenciamentoAprovado: 4,
+  credenciamentoRecusado: 5,
+  estabelecimentoAtivo: 6,
+  estabelecimentoInativo: 7,
+  fornecedorAtivo: 8,
+  fornecedorInativo: 9,
+  participanteAtivo: 10,
+  participanteInativo: 11,
+  indicadoPorEstabelecimento: 12,
+  indicadoPorFornecedor: 13,
+};

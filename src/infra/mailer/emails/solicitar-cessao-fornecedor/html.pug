@@ -1,0 +1,13 @@
+extends ./../layout.pug
+
+block title
+    | Reserva de recebíveis
+    
+block content
+    p Prezados,
+    br
+    p
+        | A solicitação de cessão de recebíveis (cód. #{codigoCessao}) para #{estabelecimento} foi realizada com sucesso.
+    p Para consultar esta solicitação acesse:
+    a(href=linkCessaoReserva) #{linkCessaoReserva}
+

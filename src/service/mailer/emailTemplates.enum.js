@@ -1,0 +1,28 @@
+/* eslint-disable max-len */
+
+module.exports = {
+  EMAIL_TESTE: 'email-teste',
+  DEFINIR_SENHA: 'definir-senha',
+  RESETAR_SENHA: 'resetar-senha',
+  CRIACAO_USUARIO: 'criacao-usuario',
+  CADASTRO_APROVADOR: 'cadastro-aprovador',
+  INDICACAO_FORNECEDOR_CADASTRADO: 'indicacao-fornecedor-cadastrado',
+  INDICACAO_FORNECEDOR_CADASTRADO_VINCULO: 'indicacao-fornecedor-cadastrado-vinculo',
+  INDICACAO_FORNECEDOR_CADASTRADO_ESTABELECIMENTO: 'indicacao-fornecedor-cadastrado-estabelecimento',
+  INDICACAO_FORNECEDOR_NAO_CADASTRADO: 'indicacao-fornecedor-nao-cadastrado',
+  INDICACAO_ESTABELECIMENTO_CADASTRADO: 'indicacao-estabelecimento-cadastrado',
+  INDICACAO_ESTABELECIMENTO_FORNECEDOR: 'indicacao-estabelecimento-fornecedor',
+  INDICACAO_ESTABELECIMENTO_RECUSADA: 'indicacao-estabelecimento-recusada',
+  INDICACAO_ESTABELECIMENTO_ACEITA: 'indicacao-estabelecimento-aceita',
+  CANCELAMENTO_VALOR_DISPONIVEL_FORNECEDOR: 'cancelamento-valor-disponivel-fornecedor',
+  LIBERACAO_VALOR_DISPONIVEL_FORNECEDOR: 'liberacao-valor-disponivel-fornecedor',
+  INDICACAO_FORNECEDOR_RECUSADA: 'indicacao-fornecedor-recusada',
+  INDICACAO_FORNECEDOR_ACEITA: 'indicacao-fornecedor-aceita',
+  SOLICITAR_CESSAO_ESTABELECIMENTO: 'solicitar-cessao-estabelecimento',
+  SOLICITAR_CESSAO_FORNECEDOR: 'solicitar-cessao-fornecedor',
+  CESSAO_APROVADA_ESTABELECIMENTO: 'cessao-aprovada-estabelecimento',
+  CESSAO_APROVADA_FORNECEDOR: 'cessao-aprovada-fornecedor',
+  CESSAO_REPROVADA_ESTABELECIMENTO: 'cessao-reprovada-estabelecimento',
+  CESSAO_REPROVADA_FORNECEDOR: 'cessao-reprovada-fornecedor',
+  CREDENCIAMENTO_VALORES_ALTERADOS: 'credenciamento-valores-alterados',
+};

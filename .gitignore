@@ -1,0 +1,53 @@
+# Logs #
+/logs
+*.log
+*.log*
+
+# Node files #
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# OS generated files #
+.DS_Store
+Thumbs.db
+.tmp/
+.vscode/launch.json
+.vscode/settings.json
+src/api/schema.gql
+
+# Typing #
+typings/
+
+# Dist #
+dist/
+dist-migrations/
+tsconfig.build.json
+
+# IDE #
+.idea/
+*.swp
+.awcache
+
+# Generated source-code #
+# src/**/*.js
+# src/**/*.js.map
+!src/public/**/*
+# test/**/*.js
+# test/**/*.js.map
+coverage/
+!test/preprocessor.js
+
+# Environment
+#.env
+.env.local
+
+#src
+src/environment/siscof.js.bkp
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+.scannerwork

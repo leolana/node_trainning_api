@@ -1,0 +1,14 @@
+extends ./../layout.pug
+
+block title
+    | Indicação de fornecedor
+    
+block content
+    p Prezados,
+    br
+    p 
+        | O fornecedor #{fornecedor} foi indicado com sucesso. 
+        | A partir de agora seu estabelecimento poderá realizar cessão de recebíveis para este fornecedor pela Alpe.
+    p Consulte as cessões solicitadas em:
+    a(href=linkSolicitarCessaoPendentes) #{linkSolicitarCessaoPendentes}
+

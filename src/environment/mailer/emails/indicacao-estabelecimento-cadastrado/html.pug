@@ -1,0 +1,12 @@
+extends ./../layout.pug
+
+block title
+    | Indicação de EC
+    
+block content
+    p Prezados,
+    br
+    p
+        | O fornecedor #{fornecedor} sob o CNPJ #{documento} indicou você como parceiro para realização de Cessão de Recebíveis pela ALPE.
+    p Acesse o Portal Alpe para aprovação:
+    a(href=linkFornecedoresCessao) #{linkFornecedoresCessao}
