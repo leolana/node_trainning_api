@@ -5,7 +5,6 @@ import { Sequelize } from 'sequelize-database';
 
 import { PersonAPI } from '../../../infra/movidesk';
 import { LoggerInterface } from '../../../infra/logging';
-import { typeEnum as tiposParticipante } from '../../../domain/services/participante/typeEnum';
 import { MovideskUseCases, getMovideskUseCases } from '../../../domain/usecases/movidesk';
 
 import Controller from '../Controller';
@@ -43,21 +42,13 @@ class MovideskController implements Controller {
 
   checkParticipantAccessToChatbox = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const participanteId = +req.user.participante;
-      const isParticipante = this.auth.isParticipante(
-        req,
-        tiposParticipante.estabelecimento,
-        tiposParticipante.fornecedor
-      );
-      const userEmail = req.user.email;
-      const userName = req.user.name;
-
-      const result = await this.usecases.checkParticipantAccessToChatbox(
-        participanteId,
-        isParticipante,
-        userEmail,
-        userName
-      );
+      const result = {
+        integrado: false,
+        uuidIntegracao: null,
+        participanteId: null,
+        email: null,
+        nome: null
+      };
 
       res.send(result);
 
@@ -68,18 +59,7 @@ class MovideskController implements Controller {
 
   forceMovideskPersonIntegration = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const participanteId = +req.body.participanteId;
-      const userEmail = req.user.email;
-      const throwErrors = true;
-
-      await this.usecases.forceMovideskPersonIntegration(
-        participanteId,
-        userEmail,
-        throwErrors
-      );
-
       res.end();
-
     } catch (error) {
       next(error);
     }

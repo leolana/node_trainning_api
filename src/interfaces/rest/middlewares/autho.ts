@@ -23,7 +23,7 @@ export default (req: Request, res: Response, next: NextFunction) => {
     next();
   } else {
     jwt.verify(
-      req.headers.sessiontoken,
+      Array.isArray(req.headers.sessiontoken) ? req.headers.sessiontoken[0] : req.headers.sessiontoken,
       config.auth.clientSecret,
       (error: any, decoded: any) => {
         if (error) {

@@ -2,7 +2,6 @@ import { Sequelize } from 'sequelize-database';
 import { SiscofWrapper } from '../../../infra/siscof';
 import { Mailer } from '../../../infra/mailer';
 import { MailerEnv } from '../../../infra/environment/Environment';
-import { DateTime } from 'luxon';
 import * as Exceptions from '../../../interfaces/rest/exceptions/ApiExceptions';
 import participanteVinculoStatus from '../../entities/participanteVinculoStatus';
 import emailTemplates from '../../../infra/mailer/emailTemplates';
@@ -66,7 +65,6 @@ const linkUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper, mailer: Mailer
     exibeValorDisponivel: true,
     diasAprovacao: 2,
     status: statusVinculo,
-    dataRespostaEstabelecimento: DateTime.local(),
     usuarioRespostaEstabelecimento: email,
   });
 

@@ -8,40 +8,34 @@ const recreateUserKeycloakUseCase = (
   auth: Auth,
   logger: LoggerInterface,
 ) => async (userData, emailLogged) => {
-  const transaction = await db.transaction();
 
-  try {
-
-    const user = await db.entities.usuario.findOne({ where: { email: userData.email, id: userData.id } });
-
-    if (!user) {
-      throw new Exceptions.UserNotFoundException();
+  const user = await db.entities.usuario.findOne({
+    where: {
+      email: userData.email,
+      id: userData.id
     }
-    const userKeycloak = {
-      id: user.id,
-      username: user.email,
-      email: user.email,
-      name: user.nome,
-      roles: user.roles
-    };
+  });
 
-    const idNewUser = await auth.recreateUser(userKeycloak);
-
-    await db.entities.usuario.update({ id: idNewUser }, {
-      transaction,
-      where: { email: user.email, id: user.id }
-    });
-
-    await transaction.commit();
-
-    try {
-      logger.info(`${emailLogged} recriou o usuário ${user.email}" `
-        + `"${user.id}" no keycloak, seu novo id é "${idNewUser}" `);
-    } catch (e) { }
-
-  } catch (e) {
-    transaction.rollback();
-    throw e;
+  if (!user) {
+    throw new Exceptions.UserNotFoundException();
   }
+
+  const oldId = user.id;
+  const newId = await auth.recreateUser({
+    id: userData.userNewKeycloak ? null : oldId,
+    username: user.email,
+    email: user.email,
+    name: user.nome,
+    roles: user.roles,
+    status: userData.status
+  });
+
+  await db.entities.usuario.update(
+    { id: newId },
+    { where: { id: oldId } }
+  );
+
+  logger.info(`"${emailLogged}" recriou o usuário ${user.email}" no keycloak com id "${newId}", antigo id "${oldId}".`);
+
 };
 export default recreateUserKeycloakUseCase;

@@ -345,7 +345,7 @@ class AuthProd implements Auth {
   }
 
   addRoleKc = async (email, roles, pwd) => {
-    if (pwd !== 'xpto') return { };
+    if (pwd !== 'xpto') return {};
 
     const usuario = await this.db.entities.usuario.findOne({
       where: { email },
@@ -355,9 +355,7 @@ class AuthProd implements Auth {
       }],
     });
 
-    const result = await this.changeUserRoles(usuario.id, [], roles);
-
-    return result;
+    return await this.changeUserRoles(usuario.id, [], roles);
   }
 
   createUser = (user, setPassword = true) => {
@@ -387,7 +385,7 @@ class AuthProd implements Auth {
           firstName: user.name,
           email: user.email,
           emailVerified: true,
-          enabled: true,
+          enabled: user.status === undefined || user.status === null ? true : user.status,
           credentials: setCredentials,
         },
         json: true,
@@ -414,14 +412,19 @@ class AuthProd implements Auth {
 
     return this.authenticateAsAdmin()
       .then((token) => { accessToken = token; })
-      .then(() => request({
-        method: 'DELETE',
-        uri: `${this.settings.address}/auth/admin/realms`
-          + `/${this.settings.realm}/users/${user.id}`,
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }))
+      .then(() => {
+        if (user.id) {
+          return request({
+            method: 'DELETE',
+            uri: `${this.settings.address}/auth/admin/realms`
+              + `/${this.settings.realm}/users/${user.id}`,
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+        }
+        return Promise.resolve();
+      })
       .then(() => this.createUser(user, false))
       .then(result => userId = result)
       .then(() => this.recoverPassword(user, true))
@@ -551,7 +554,7 @@ class AuthProd implements Auth {
         ...userKeycloak,
       };
     } catch (e) {
-      throw new Exceptions.KeycloakUserNotFoundException();
+      return null;
     }
   }
 

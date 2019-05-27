@@ -33,7 +33,7 @@ const getProviderBondsUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper) =>
   vinculo.status = novoStatus;
 
   if (novoStatus !== participanteVinculoStatus.pendente) {
-    vinculo.dataRespostaEstabelecimento = DateTime.local().toSQLDate();
+    vinculo.dataRespostaEstabelecimento = DateTime.local().toUTC().toSQL();
     vinculo.usuarioRespostaEstabelecimento = email;
   }
 

@@ -254,8 +254,7 @@ const details = db => (id) => {
         ...credenciamento.contato.dataValues,
       },
       instalacao: {
-        ...credenciamento.instalacao.dataValues,
-        ...credenciamento.contato.dataValues,
+        ...credenciamento.instalacao.dataValues
       },
       domiciliosBancarios: credenciamento.domiciliosBancarios.map(
         d => ({ banco: `${d.bancoId} - ${d.bancoNome}`, ...d.dataValues })

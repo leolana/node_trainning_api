@@ -63,6 +63,7 @@ class UsuariosController implements Controller {
     router.put('/recriar-keycloak', this.recriarKeycloak);
     router.put('/usuarios/reenviar-convite', require, this.reenviarConvite);
     router.put('/usuario/status', require, this.atualizarStatus);
+    router.get('/usuario/status', require, this.validateKeycloakUserStatus);
     router.get('/info/keycloak/:id', require, this.obterInformacoesKeycloak);
 
     router.get(

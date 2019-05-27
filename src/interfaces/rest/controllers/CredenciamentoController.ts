@@ -254,16 +254,24 @@ class CredenciamentoController implements Controller {
   }
 
   approve = async (req: Request, res: Response, next: NextFunction) => {
-    const credenciamentoId = +req.params.id;
-    const user = req.user.email;
+    try {
+      const credenciamentoId = +req.params.id;
+      const user = req.user.email;
 
-    return this.usecases.canApprove(credenciamentoId)
-      .then(() => this.usecases.approve(credenciamentoId, user))
-      .then((credenciamento: any) => this.movideskUsecases
-        .forceMovideskPersonIntegration(credenciamento.participanteId, user, false)
-        .then(() => res.send(credenciamento))
-      )
-      .catch(next);
+      await this.usecases.canApprove(
+        credenciamentoId
+      );
+
+      const credenciamento = await this.usecases.approve(
+        credenciamentoId,
+        user
+      );
+
+      res.send(credenciamento);
+
+    } catch (error) {
+      next(error);
+    }
   }
 
   addAnalysisFile = async (req: Request, res: Response, next: NextFunction) => {

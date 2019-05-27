@@ -203,22 +203,8 @@ class FornecedoresController implements Controller {
 
       if (data.id) {
         await this.fornecedor.edit(data, files, userEmail);
-
       } else {
-
-        const participantId = await this.fornecedor.add(
-          data,
-          files,
-          userEmail
-        );
-
-        const throwErrors = false;
-
-        await this.movideskUsecases.forceMovideskPersonIntegration(
-          participantId,
-          userEmail,
-          throwErrors
-        );
+        await this.fornecedor.add(data, files, userEmail);
       }
 
       res.end();
