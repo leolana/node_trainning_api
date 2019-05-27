@@ -31,7 +31,7 @@ const participanteTaxaModel = (sequelize: Sequelize, dataTypes: DataTypes) => {
         type: dataTypes.INTEGER,
         allowNull: false,
         validate: {
-          isIn: [<any[]>Object.values(rateTypeEnum)]
+          isIn: [Object.values(rateTypeEnum)]
         }
       },
     }

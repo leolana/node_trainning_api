@@ -40,7 +40,7 @@ const participanteTaxaHistoricoModel = (sequelize: Sequelize, dataTypes: DataTyp
         type: dataTypes.INTEGER,
         allowNull: false,
         validate: {
-          isIn: [<any[]>Object.values(rateTypeEnum)]
+          isIn: [Object.values(rateTypeEnum)]
         }
       },
     },
