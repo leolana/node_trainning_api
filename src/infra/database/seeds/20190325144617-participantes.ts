@@ -2,7 +2,7 @@
 import { QueryInterface } from 'sequelize';
 
 import { defaultUser } from '../consts';
-import rateTypeEnum from '../../../domain/services/participante/rateTypeEnum';
+import rateTypeEnum from '../../../domain/services/types/rateTypeEnum';
 import tiposPessoa from '../../../domain/entities/tiposPessoa';
 
 enum TipoParticipante {

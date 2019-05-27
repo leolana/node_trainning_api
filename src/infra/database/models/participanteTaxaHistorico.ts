@@ -2,7 +2,7 @@
 // tslint:disable:no-invalid-this
 import { Sequelize, DataTypes } from 'sequelize-database';
 
-import rateTypeEnum from '../../../domain/services/participante/rateTypeEnum';
+import rateTypeEnum from '../../../domain/services/types/rateTypeEnum';
 
 const participanteTaxaHistoricoModel = (sequelize: Sequelize, dataTypes: DataTypes) => {
   const participanteTaxaHistorico = sequelize.define(

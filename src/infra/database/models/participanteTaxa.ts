@@ -1,7 +1,7 @@
 // tslint:disable:no-magic-numbers
 import { Sequelize, DataTypes } from 'sequelize-database';
 
-import rateTypeEnum from '../../../domain/services/participante/rateTypeEnum';
+import rateTypeEnum from '../../../domain/services/types/rateTypeEnum';
 
 const participanteTaxaModel = (sequelize: Sequelize, dataTypes: DataTypes) => {
   const participanteTaxa = sequelize.define(

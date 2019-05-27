@@ -5,7 +5,7 @@ import SiscofConnector from './SiscofConnector';
 import SiscofFormatter from './SiscofFormatter';
 import tiposPessoa from '../../domain/entities/tiposPessoa';
 import participanteVinculoStatus from '../../domain/entities/participanteVinculoStatus';
-import rateTypeEnum from '../../domain/services/participante/rateTypeEnum';
+import rateTypeEnum from '../../domain/services/types/rateTypeEnum';
 
 import types from '../../constants/types';
 import { PreconditionFailedError } from '../../interfaces/rest/errors/ApiErrors';
