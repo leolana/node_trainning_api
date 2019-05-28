@@ -1,21 +1,10 @@
 import { Container, interfaces } from 'inversify';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 
 import { DatabaseFactory } from './infra/database';
 import Application from './Application';
 import { LoggerInterface, LoggerFactory } from './infra/logging';
 import Server from './infra/api/Server';
-
-import {
-  SiscofCmd,
-  SiscofDb,
-  SiscofConnector,
-  SiscofConnectorDev,
-  SiscofConnectorProd,
-  SiscofDbBootstrapper,
-  SiscofFormatter,
-  SiscofWrapper
-} from './infra/siscof';
 
 import { Mailer, MailerAWS, MailerDev, MailerFactory } from './infra/mailer';
 import { Auth, AuthDev, AuthProd, AuthFactory } from './infra/auth';
@@ -31,7 +20,6 @@ import VinculoService from './domain/services/VinculoService';
 import types from './constants/types';
 import InternalApisFactory from './infra/internalApis/InternalApisFactory';
 import PersonAPIFactory from './infra/movidesk/PersonAPIFactory';
-import SiscofConnectorFactory from './infra/siscof/SiscofConnectorFactory';
 
 const container = new Container();
 
@@ -109,27 +97,6 @@ container
       return factory.create();
     };
   });
-
-container.bind<SiscofCmd>(types.SiscofCmd).to(SiscofCmd);
-container.bind<SiscofDb>(types.SiscofDb).toDynamicValue((context: interfaces.Context) => {
-  const siscofDbBootstrapper = new SiscofDbBootstrapper(context);
-  return siscofDbBootstrapper.create();
-}).inSingletonScope();
-
-container.bind<SiscofConnectorDev>(types.SiscofConnectorDev).to(SiscofConnectorDev);
-container.bind<SiscofConnectorProd>(types.SiscofConnectorProd).to(SiscofConnectorProd);
-container
-  .bind<interfaces.Factory<SiscofConnector>>(types.SiscofConnectorFactory)
-  .toFactory<SiscofConnector>((context: interfaces.Context) => {
-    return () => {
-      const factory = new SiscofConnectorFactory(context);
-
-      return factory.create();
-    };
-  });
-
-container.bind<SiscofFormatter>(types.SiscofFormatter).to(SiscofFormatter);
-container.bind<SiscofWrapper>(types.SiscofWrapper).to(SiscofWrapper);
 
 container.bind<CessionService>(types.CessionService).to(CessionService);
 container.bind<VinculoService>(types.VinculoService).to(VinculoService);

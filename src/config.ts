@@ -1,7 +1,6 @@
 import {
   Environment,
   AppEnv,
-  SiscofEnv,
   MonitorEnv,
   SwaggerEnv,
   HealthCheckEnv,
@@ -21,17 +20,6 @@ export const config: Environment = {
     banner: true,
     uri: 'http://localhost',
   } as AppEnv,
-  siscof: {
-    poolAlias: 'siscof',
-    _enableStats: false,
-    poolIncrement: 1,
-    poolMin: 0,
-    poolMax: 4,
-    poolPingInterval: 60,
-    poolTimeout: 60,
-    queueRequests: true,
-    queueTimeout: 60000,
-  } as SiscofEnv,
   movidesk: {
   } as MovideskEnv,
   paramStore: {

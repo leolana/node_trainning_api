@@ -10,7 +10,6 @@ import {
   AppEnv,
   LogEnv,
   DatabaseEnv,
-  SiscofEnv,
   AuthEnv,
   InternalApiEnv,
   MovideskEnv,
@@ -32,7 +31,6 @@ export class EnvProcessBuilder {
   private appSettings: AppEnv;
   private logSettings: LogEnv;
   private dbSettings: DatabaseEnv;
-  private siscofSettings: SiscofEnv;
   private authSettings: AuthEnv;
   private internalApiSettings: InternalApiEnv;
   private movideskSettings: MovideskEnv;
@@ -89,21 +87,6 @@ export class EnvProcessBuilder {
     return this;
   }
 
-  addSiscofEnv = (): EnvProcessBuilder => {
-    const siscofProcessEnv = {
-      enableMock: toBool(getOsEnvOptional('ENABLE_MOCK_SISCOF')),
-      user: getOsEnv('ALPE_SISCOF_USER'),
-      password: getOsEnv('ALPE_SISCOF_PASSWORD'),
-      connectString: getOsEnv('ALPE_SISCOF_CONNECTSTRING'),
-    } as SiscofEnv;
-
-    const siscofEnv: SiscofEnv = Object.assign({}, this.configDefault.siscof, siscofProcessEnv);
-
-    this.siscofSettings = siscofEnv;
-
-    return this;
-  }
-
   addAuthEnv = (): EnvProcessBuilder => {
     const authProcessEnv = {
       enableMock: toBool(getOsEnvOptional('ENABLE_MOCK_AUTH')),
@@ -133,14 +116,6 @@ export class EnvProcessBuilder {
       enableMock: toBool(getOsEnvOptional('ENABLE_MOCK_INTERNALAPIS')),
       addressBancos: getOsEnv('ALPE_APIS_BANCOS_ADDRESS'),
       addressCEPs: getOsEnv('ALPE_APIS_CEPS_ADDRESS'),
-      financial: {
-        auth: Buffer.from(
-          `${getOsEnv('ALPE_APIS_FINANCIAL_LOGIN')}:${getOsEnv(
-            'ALPE_APIS_FINANCIAL_PWD'
-          )}`
-        ).toString('base64'),
-        address: getOsEnv('ALPE_APIS_FINANCIAL_ADDRESS'),
-      },
     } as InternalApiEnv;
 
     const internalApiEnv: InternalApiEnv = Object.assign({}, this.configDefault.internalApis, internalApiProcessEnv);
@@ -227,7 +202,6 @@ export class EnvProcessBuilder {
       app: this.appSettings,
       log: this.logSettings,
       db: this.dbSettings,
-      siscof: this.siscofSettings,
       auth: this.authSettings,
       internalApis: this.internalApiSettings,
       movidesk: this.movideskSettings,
@@ -237,8 +211,6 @@ export class EnvProcessBuilder {
       sentry: this.sentrySettings,
     } as Environment;
 
-    const environment: Environment = Object.assign({}, this.configDefault, configEnvProcess);
-
-    return environment;
+    return Object.assign({}, this.configDefault, configEnvProcess);
   }
 }

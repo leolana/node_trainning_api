@@ -19,13 +19,6 @@ const TYPES = {
   AuthDev: Symbol.for('AuthDev'),
   AuthProd: Symbol.for('AuthProd'),
   AuthFactory: Symbol.for('Factory<Auth>'),
-  SiscofCmd: Symbol.for('SiscofCmd'),
-  SiscofConnectorFactory: Symbol.for('Factory<SiscofConnector>'),
-  SiscofConnectorDev: Symbol.for('SiscofConnectorDev'),
-  SiscofConnectorProd: Symbol.for('SiscofConnectorProd'),
-  SiscofDb: Symbol.for('SiscofDb'),
-  SiscofWrapper: Symbol.for('SiscofWrapper'),
-  SiscofFormatter: Symbol.for('SiscofFormatter'),
   CessionService: Symbol.for('CessionService'),
   VinculoService: Symbol.for('VinculoService'),
 };

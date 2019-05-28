@@ -13,7 +13,6 @@ class EnvironmentFactory {
       .addAppEnv()
       .addLogEnv()
       .addDbEnv()
-      .addSiscofEnv()
       .addAuthEnv()
       .addInternalApiEnv()
       .addMovideskEnv()
@@ -40,7 +39,6 @@ class EnvironmentFactory {
     return envBuilder
       .addLogEnv(envParams.log, awsParameters)
       .addDbEnv(envParams.db, awsParameters)
-      .addSiscofEnv(envParams.siscof, awsParameters)
       .addAuthEnv(envParams.auth, awsParameters)
       .addInternalApiEnv(envParams.internalApis, awsParameters)
       .addMovideskEnv(envParams.movidesk, awsParameters)
