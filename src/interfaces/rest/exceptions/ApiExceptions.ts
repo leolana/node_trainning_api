@@ -6,6 +6,18 @@ export class InvalidBoundBetweenSameParticipantException extends Errors.Conflict
   }
 }
 
+export class InvalidTypeNominationException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('tipo-indicacao-invalido');
+  }
+}
+
+export class InvalidStatusNominationException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('status-indicacao-invalido');
+  }
+}
+
 export class AlreadyNominatedProviderException extends Errors.ConflictError {
   constructor() {
     super('fornecedor-ja-indicado');
@@ -30,6 +42,12 @@ export class CouldNotCreatBondException extends Errors.NotFoundError {
   }
 }
 
+export class InvalidBoundStatusException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('vinculo-status-invalido');
+  }
+}
+
 export class TermoNotFoundException extends Errors.NotFoundError {
   constructor() {
     super('termo-nao-encontrado');
@@ -51,6 +69,24 @@ export class InvalidRecurrencyStatusException extends Errors.PreconditionFailedE
 export class InvalidCessionStatusException extends Errors.PreconditionFailedError {
   constructor() {
     super('status-cessao-invalido');
+  }
+}
+
+export class InvalidCessionTypeException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('tipo-cessao-invalido');
+  }
+}
+
+export class InvalidRejectionTypeException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('tipo-recusa-invalido');
+  }
+}
+
+export class InvalidCessionPaymentException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('diluicao-pagamento-cessao-invalido');
   }
 }
 
