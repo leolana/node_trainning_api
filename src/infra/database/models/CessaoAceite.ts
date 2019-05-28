@@ -19,8 +19,8 @@ export class CessaoAceite extends Model<CessaoAceite> {
 
   @Is('statusValidation', statusValidation)
   @AllowNull(false)
-  @Column(DataType.SMALLINT)
   @Default(cessaoStatus.aguardandoAprovacao)
+  @Column(DataType.SMALLINT)
   status: number;
 
   @AllowNull(false)

@@ -71,8 +71,8 @@ export class ParticipanteHistorico extends Model<ParticipanteHistorico> {
   inscricaoMunicipal: string;
 
   @AllowNull(false)
-  @Column(DataType.BOOLEAN)
   @Default(true)
+  @Column(DataType.BOOLEAN)
   ativo: boolean;
 
   @AllowNull(false)

@@ -17,8 +17,8 @@ export class MotivoTipoRecusa extends Model<MotivoTipoRecusa> {
   motivoRecusaId: number;
 
   @AllowNull(false)
-  @Column(DataType.BOOLEAN)
   @Is('typeRejectionValidation', typeRejectionValidation)
+  @Column(DataType.BOOLEAN)
   recusaTipoId: number;
 
   @HasMany(() => ParticipanteIndicacao, 'motivoTipoRecusaId')

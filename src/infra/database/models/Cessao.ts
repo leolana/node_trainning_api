@@ -26,8 +26,8 @@ export class Cessao extends Model<Cessao> {
 
   @Is('statusValidation', statusValidation)
   @AllowNull(false)
-  @Column(DataType.SMALLINT)
   @Default(cessaoStatus.aguardandoAprovacao)
+  @Column(DataType.SMALLINT)
   status: number;
 
   @AllowNull(false)
@@ -87,14 +87,14 @@ export class Cessao extends Model<Cessao> {
   numeroParcelas: number;
 
   @AllowNull(false)
-  @Column(DataType.SMALLINT)
   @Default(cessaoTipo.cessao)
+  @Column(DataType.SMALLINT)
   @Is('cessaoTipoValidation', cessaoTipoValidation)
   tipo: number;
 
   @AllowNull(false)
-  @Column(DataType.SMALLINT)
   @Default(cessaoDiluicaoPagamento.diaVencimento)
+  @Column(DataType.SMALLINT)
   @Is('cessaoDiluicaoValidation', cessaoDiluicaoValidation)
   diluicaoPagamento: number;
 

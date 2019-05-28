@@ -23,8 +23,8 @@ export class ParticipanteVinculoHistorico extends Model<ParticipanteVinculoHisto
 
   @Is('statusValidation', statusValidation)
   @AllowNull(false)
-  @Column(DataType.SMALLINT)
   @Default(participanteVinculoStatus.pendente)
+  @Column(DataType.SMALLINT)
   status: number;
 
   @AllowNull(false)

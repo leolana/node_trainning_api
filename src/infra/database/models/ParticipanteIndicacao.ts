@@ -19,8 +19,8 @@ export class ParticipanteIndicacao extends Model<ParticipanteIndicacao> {
   participanteId: number;
 
   @AllowNull(false)
-  @Column(DataType.INTEGER)
   @Is('typePersonValidation', typePersonValidation)
+  @Column(DataType.INTEGER)
   tipoPessoa: number;
 
   @AllowNull(false)
@@ -40,8 +40,8 @@ export class ParticipanteIndicacao extends Model<ParticipanteIndicacao> {
   telefone: string;
 
   @AllowNull(false)
-  @Column(DataType.INTEGER)
   @Is('participantNominationValidation', participantNominationValidation)
+  @Column(DataType.INTEGER)
   canalEntrada: number;
 
   @AllowNull(false)
@@ -49,9 +49,9 @@ export class ParticipanteIndicacao extends Model<ParticipanteIndicacao> {
   usuario: string;
 
   @AllowNull(false)
-  @Column(DataType.SMALLINT)
   @Default(participanteIndicacaoStatus.pendente)
   @Is('indicacaoStatusValidaiton', indicacaoStatusValidaiton)
+  @Column(DataType.SMALLINT)
   status: number;
 
   @AllowNull(true)

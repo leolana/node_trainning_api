@@ -19,8 +19,8 @@ export class MotivoRecusa extends Model<MotivoRecusa> {
   requerObservacao: boolean;
 
   @AllowNull(false)
-  @Column(DataType.BOOLEAN)
   @Default(true)
+  @Column(DataType.BOOLEAN)
   ativo: boolean;
 
   @HasMany(() => MotivoTipoRecusa, 'motivoRecusaId')

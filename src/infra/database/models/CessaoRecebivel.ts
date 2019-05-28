@@ -52,8 +52,8 @@ export class CessaoRecebivel extends Model<CessaoRecebivel> {
 
   @Is('statusPagamentoValidation', statusPagamentoValidation)
   @AllowNull(true)
-  @Column(DataType.SMALLINT)
   @Default(cessaoRecebivelStatus.pagamentoPendente)
+  @Column(DataType.SMALLINT)
   statusPagamento: number;
 
   @BelongsTo(() => Evento, 'eventoId')

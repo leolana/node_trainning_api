@@ -17,7 +17,6 @@ import { HealthCheckUseCases, getHealthCheckUseCases } from '../../../domain/use
 class HealthController implements Controller {
   siscof: SiscofConnector;
   auth: Auth;
-  statusCredenciamento: any;
   mailer: Mailer;
   emailTemplates: any;
   settings: AppEnv;
@@ -32,7 +31,6 @@ class HealthController implements Controller {
   ) {
     this.siscof = siscof();
     this.auth = auth();
-    this.statusCredenciamento = credenciamentoStatusEnum;
     this.mailer = mailer();
     this.emailTemplates = this.mailer.emailTemplates;
     this.settings = config.app;

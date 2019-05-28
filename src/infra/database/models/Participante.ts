@@ -11,8 +11,8 @@ import { ParticipanteIndicacao } from './ParticipanteIndicacao';
 
 export class Participante extends Model<Participante> {
   @AllowNull(false)
-  @Column(DataType.SMALLINT)
   @Is('typePersonValidation', typePersonValidation)
+  @Column(DataType.SMALLINT)
   tipoPessoa: number;
 
   @AllowNull(true)

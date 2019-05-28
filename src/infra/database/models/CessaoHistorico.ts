@@ -27,8 +27,8 @@ export class CessaoHistorico extends Model<CessaoHistorico> {
 
   @Is('statusRecebivelValidation', statusRecebivelValidation)
   @AllowNull(false)
-  @Column(DataType.SMALLINT)
   @Default(cessaoRecebivelStatus.pagamentoPendente)
+  @Column(DataType.SMALLINT)
   status: number;
 
   @AllowNull(false)

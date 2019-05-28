@@ -26,8 +26,8 @@ export class ParticipanteVinculo extends Model<ParticipanteVinculo> {
 
   @Is('statusValidation', statusValidation)
   @AllowNull(false)
-  @Column(DataType.SMALLINT)
   @Default(participanteVinculoStatus.pendente)
+  @Column(DataType.SMALLINT)
   status: number;
 
   @AllowNull(false)

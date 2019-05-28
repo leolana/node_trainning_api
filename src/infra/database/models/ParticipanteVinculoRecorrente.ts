@@ -18,8 +18,8 @@ export class ParticipanteVinculoRecorrente extends Model<ParticipanteVinculoReco
 
   @Is('statusValidation', statusValidation)
   @AllowNull(false)
-  @Column(DataType.SMALLINT)
   @Default(participanteVinculoStatus.pendente)
+  @Column(DataType.SMALLINT)
   status: number;
 
   @AllowNull(false)
