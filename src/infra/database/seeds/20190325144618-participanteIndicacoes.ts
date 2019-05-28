@@ -63,7 +63,6 @@ module.exports = {
   },
 
   down: async (queryInterface: QueryInterface) => {
-    await queryInterface.bulkDelete('indicacaoFornecedorFalha', null, {});
     return queryInterface.bulkDelete('participanteIndicacao', null, {});
   }
 };
