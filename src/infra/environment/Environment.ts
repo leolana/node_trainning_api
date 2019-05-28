@@ -35,12 +35,6 @@ export type InternalApiEnv = {
   addressCEPs: string,
 };
 
-export type MovideskEnv = {
-  enableMock: boolean,
-  address: string,
-  token: string
-};
-
 export type StorageEnv = {
   enableMock: boolean,
   region: string,
@@ -92,7 +86,6 @@ export type Environment = {
   db: DatabaseEnv,
   auth: AuthEnv,
   internalApis: InternalApiEnv,
-  movidesk: MovideskEnv,
   storage: StorageEnv,
   paramStore: ParamStoreEnv,
   mailer: MailerEnv,

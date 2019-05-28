@@ -6,7 +6,6 @@ import {
   DatabaseEnv,
   AuthEnv,
   InternalApiEnv,
-  MovideskEnv,
   StorageEnv,
   MailerEnv,
   SentryEnv,
@@ -24,7 +23,6 @@ export class EnvParamStoreBuilder {
   private dbSettings: DatabaseEnv;
   private authSettings: AuthEnv;
   private internalApiSettings: InternalApiEnv;
-  private movideskSettings: MovideskEnv;
   private storageSettings: StorageEnv;
   private mailerSettings: MailerEnv;
   private sentrySettings: SentryEnv;
@@ -114,22 +112,6 @@ export class EnvParamStoreBuilder {
     return this;
   }
 
-  addMovideskEnv = (keyParams, valueParams: SSM.Types.ParameterList): EnvParamStoreBuilder => {
-    const address = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.address);
-    const token = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.token);
-
-    const movideskParamsEnv = {
-      address,
-      token,
-    } as MovideskEnv;
-
-    const movideskEnv: MovideskEnv = Object.assign({}, this.configDefault.movidesk, movideskParamsEnv);
-
-    this.movideskSettings = movideskEnv;
-
-    return this;
-  }
-
   addStorageEnv = (keyParams, valueParams: SSM.Types.ParameterList): EnvParamStoreBuilder => {
     const region = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.region);
     const bucket = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.bucket);
@@ -183,7 +165,6 @@ export class EnvParamStoreBuilder {
       db: this.dbSettings,
       auth: this.authSettings,
       internalApis: this.internalApiSettings,
-      movidesk: this.movideskSettings,
       storage: this.storageSettings,
       mailer: this.mailerSettings,
       sentry: this.sentrySettings

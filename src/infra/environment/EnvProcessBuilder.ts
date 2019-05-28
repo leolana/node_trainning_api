@@ -12,7 +12,6 @@ import {
   DatabaseEnv,
   AuthEnv,
   InternalApiEnv,
-  MovideskEnv,
   StorageEnv,
   ParamStoreEnv,
   MailerEnv,
@@ -33,7 +32,6 @@ export class EnvProcessBuilder {
   private dbSettings: DatabaseEnv;
   private authSettings: AuthEnv;
   private internalApiSettings: InternalApiEnv;
-  private movideskSettings: MovideskEnv;
   private storageSettings: StorageEnv;
   private paramStoreSettings: ParamStoreEnv;
   private mailerSettings: MailerEnv;
@@ -125,20 +123,6 @@ export class EnvProcessBuilder {
     return this;
   }
 
-  addMovideskEnv = (): EnvProcessBuilder => {
-    const movideskProcessEnv = {
-      enableMock: toBool(getOsEnvOptional('ENABLE_MOCK_MOVIDESK')),
-      address: getOsEnv('ALPE_APIS_MOVIDESK'),
-      token: getOsEnv('ALPE_MOVIDESK_TOKEN'),
-    } as MovideskEnv;
-
-    const movideskEnv: MovideskEnv = Object.assign({}, this.configDefault.movidesk, movideskProcessEnv);
-
-    this.movideskSettings = movideskEnv;
-
-    return this;
-  }
-
   addStorageEnv = (): EnvProcessBuilder => {
     const storageProcessEnv = {
       enableMock: toBool(getOsEnvOptional('ENABLE_MOCK_FILESTORAGE')),
@@ -204,7 +188,6 @@ export class EnvProcessBuilder {
       db: this.dbSettings,
       auth: this.authSettings,
       internalApis: this.internalApiSettings,
-      movidesk: this.movideskSettings,
       storage: this.storageSettings,
       paramStore: this.paramStoreSettings,
       mailer: this.mailerSettings,

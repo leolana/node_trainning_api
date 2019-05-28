@@ -6,12 +6,22 @@ import Application from './Application';
 import { LoggerInterface, LoggerFactory } from './infra/logging';
 import Server from './infra/api/Server';
 
+import {
+  SiscofCmd,
+  SiscofDb,
+  SiscofConnector,
+  SiscofConnectorDev,
+  SiscofConnectorProd,
+  SiscofDbBootstrapper,
+  SiscofFormatter,
+  SiscofWrapper
+} from './infra/siscof';
+
 import { Mailer, MailerAWS, MailerDev, MailerFactory } from './infra/mailer';
 import { Auth, AuthDev, AuthProd, AuthFactory } from './infra/auth';
 import { FileStorage, FileStorageAWS, FileStorageDev, FileStorageFactory } from './infra/fileStorage';
 import { InternalApis, InternalApisDev, InternalApisProd } from './infra/internalApis';
 import EnvironmentFactory from './infra/environment/EnvironmentFactory';
-import { PersonAPI, PersonAPIDev, PersonAPIProd } from './infra/movidesk';
 import { Environment } from './infra/environment/Environment';
 
 import CessionService from './domain/services/CessionService';
@@ -19,7 +29,7 @@ import VinculoService from './domain/services/VinculoService';
 
 import types from './constants/types';
 import InternalApisFactory from './infra/internalApis/InternalApisFactory';
-import PersonAPIFactory from './infra/movidesk/PersonAPIFactory';
+import SiscofConnectorFactory from './infra/siscof/SiscofConnectorFactory';
 
 const container = new Container();
 
@@ -86,17 +96,26 @@ container
     };
   });
 
-container.bind<PersonAPIDev>(types.PersonAPIDev).to(PersonAPIDev);
-container.bind<PersonAPIProd>(types.PersonAPIProd).to(PersonAPIProd);
+container.bind<SiscofCmd>(types.SiscofCmd).to(SiscofCmd);
+container.bind<SiscofDb>(types.SiscofDb).toDynamicValue((context: interfaces.Context) => {
+  const siscofDbBootstrapper = new SiscofDbBootstrapper(context);
+  return siscofDbBootstrapper.create();
+}).inSingletonScope();
+
+container.bind<SiscofConnectorDev>(types.SiscofConnectorDev).to(SiscofConnectorDev);
+container.bind<SiscofConnectorProd>(types.SiscofConnectorProd).to(SiscofConnectorProd);
 container
-  .bind<interfaces.Factory<PersonAPI>>(types.PersonAPIFactory)
-  .toFactory<PersonAPI>((context: interfaces.Context) => {
+  .bind<interfaces.Factory<SiscofConnector>>(types.SiscofConnectorFactory)
+  .toFactory<SiscofConnector>((context: interfaces.Context) => {
     return () => {
-      const factory = new PersonAPIFactory(context);
+      const factory = new SiscofConnectorFactory(context);
 
       return factory.create();
     };
   });
+
+container.bind<SiscofFormatter>(types.SiscofFormatter).to(SiscofFormatter);
+container.bind<SiscofWrapper>(types.SiscofWrapper).to(SiscofWrapper);
 
 container.bind<CessionService>(types.CessionService).to(CessionService);
 container.bind<VinculoService>(types.VinculoService).to(VinculoService);
