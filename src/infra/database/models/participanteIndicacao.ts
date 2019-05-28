@@ -3,7 +3,7 @@ import { Sequelize, DataTypes } from 'sequelize-database';
 
 import participanteIndicacaoStatus from '../../../domain/entities/participanteIndicacaoStatus';
 import participateNominationSourceEnum from '../../../domain/entities/participateNominationSourceEnum';
-import personTypeEnum from '../../../domain/services/participante/personTypeEnum';
+import personTypeEnum from '../../../domain/services/types/personTypeEnum';
 
 const participanteIndicacaoModel = (sequelize: Sequelize, dataTypes: DataTypes) => {
   const participanteIndicacao = sequelize.define(
