@@ -21,6 +21,8 @@ import { Environment, MailerEnv } from '../../../infra/environment/Environment';
 import CessionService from '../../../domain/services/CessionService';
 
 import types from '../../../constants/types';
+import requestCessionUseCase from '../../../domain/usecases/cessao/requestCessionUseCase';
+import { LoggerInterface } from '../../../infra/logging/LoggerInterface';
 
 @injectable()
 class CessaoController implements Controller {
@@ -39,6 +41,7 @@ class CessaoController implements Controller {
     @inject(types.Environment) config: Environment,
     @inject(types.SiscofWrapper) siscofWrapper: SiscofWrapper,
     @inject(types.CessionService) cessionService: CessionService,
+    @inject(types.Logger) private logger: LoggerInterface,
   ) {
     this.db = db;
     this.auth = auth();
@@ -143,6 +146,11 @@ class CessaoController implements Controller {
       this.auth.requireParticipante(typeEnum.fornecedor),
       this.obterCessao,
     );
+    router.post(
+      '/fornecedores/solicitarCessao',
+      this.auth.requireParticipante(typeEnum.fornecedor),
+      this.requestCession
+    );
 
     return router;
   }
@@ -222,7 +230,7 @@ class CessaoController implements Controller {
           });
         return resultSiscof;
       });
-    return action;
+    return (action);
   }
 
   private approveCession = (aprovado) => {
@@ -240,12 +248,12 @@ class CessaoController implements Controller {
             termo.id,
             req.user.email,
           );
-          return promise;
+          return (promise);
         })
         .then(() => res.end())
         .catch(next);
     };
-    return action;
+    return (action);
   }
 
   obterCessoes = async (req: Request, res: Response, next: NextFunction) => {
@@ -368,19 +376,17 @@ class CessaoController implements Controller {
     const collection: any = {};
 
     const listEventos = () => {
-      const action = this.db.entities.evento
+      return this.db.entities.evento
         .findAll({
           attributes: ['id', 'nome'],
         })
         .then((arr) => {
           collection.eventos = arr;
         });
-
-      return action;
     };
 
     const listBandeiras = () => {
-      const action = this.db.entities.bandeira
+      return this.db.entities.bandeira
         .findAll({
           where: {
             ativo: true,
@@ -390,12 +396,10 @@ class CessaoController implements Controller {
         .then((arr) => {
           collection.bandeiras = arr;
         });
-
-      return action;
     };
 
     const get = () => {
-      const action = entity.dbSet
+      return entity.dbSet
         .findOne({
           where: { participanteId },
           include: [
@@ -549,7 +553,6 @@ class CessaoController implements Controller {
           throw error;
         });
 
-      return action;
     };
 
     return Promise.all([listEventos(), listBandeiras()]).then(get);
@@ -634,30 +637,40 @@ class CessaoController implements Controller {
     const dataVencimento = new Date(req.query.dataVencimento);
 
     const getVinculo = () => {
-      const action = this.db.entities.participanteVinculo.findOne({
+      return this.db.entities.participanteVinculo.findOne({
         where: { id: vinculoId },
         attributes: [
           'participanteEstabelecimentoId',
           'participanteFornecedorId',
         ],
       });
-      return action;
     };
 
     const getOptions = (vinculo) => {
-      const action = installmentOptions(this.siscofWrapper)(
+      return installmentOptions(this.siscofWrapper)(
         vinculo.participanteFornecedorId,
         vinculo.participanteEstabelecimentoId,
         dataVencimento,
         valorSolicitado,
       );
-      return action;
     };
 
     return getVinculo()
       .then(vinculo => getOptions(vinculo))
       .then(options => res.send(options))
       .catch(next);
+  }
+
+  requestCession = async (req: Request, res: Response, next: NextFunction) => {
+    const linkId = +req.body.vinculoId;
+    const { tipo } = req.body;
+
+    try {
+      const cessionId = await
+        requestCessionUseCase(
+          this.db, this.siscofWrapper, this.mailer, this.mailerConfig, this.logger)(req.body, linkId, tipo, req.user);
+      res.send({ id: cessionId });
+    } catch (err) { next(err); }
   }
 
   solicitarCessaoParcelada = async (req: Request, res: Response, next: NextFunction) => {

@@ -1,4 +1,4 @@
-import deformatDocument from '../../domain/services/credenciamento/deformatDocument';
+import deformatDocument from '../../domain/services/document/deformatDocument';
 
 export enum MovideskTipoPessoa {
   Pessoa = 1,

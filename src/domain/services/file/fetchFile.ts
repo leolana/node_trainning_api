@@ -1,4 +1,4 @@
-import deformatDocument from '../credenciamento/deformatDocument';
+import deformatDocument from '../document/deformatDocument';
 
 const fetchFile = (fileStorage) => {
   const findEntity = (model, document, options) => model

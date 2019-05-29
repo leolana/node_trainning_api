@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import deformatDocument from '../../../domain/services/credenciamento/deformatDocument';
+import deformatDocument from '../../../domain/services/document/deformatDocument';
 
 const getProviderRequestedLinksUsecase = db => (
   fornecedorId,
