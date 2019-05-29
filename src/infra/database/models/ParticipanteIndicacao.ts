@@ -19,30 +19,8 @@ export class ParticipanteIndicacao extends Model<ParticipanteIndicacao> {
   participanteId: number;
 
   @AllowNull(false)
-  @Is('typePersonValidation', typePersonValidation)
-  @Column(DataType.INTEGER)
-  tipoPessoa: number;
-
-  @AllowNull(false)
   @Column(DataType.STRING(18))
   documento: string;
-
-  @AllowNull(true)
-  @Column(DataType.STRING(100))
-  nome: string;
-
-  @AllowNull(true)
-  @Column(DataType.STRING(200))
-  email: string;
-
-  @AllowNull(true)
-  @Column(DataType.STRING(11))
-  telefone: string;
-
-  @AllowNull(false)
-  @Is('participantNominationValidation', participantNominationValidation)
-  @Column(DataType.INTEGER)
-  canalEntrada: number;
 
   @AllowNull(false)
   @Column(DataType.STRING(100))
@@ -61,6 +39,28 @@ export class ParticipanteIndicacao extends Model<ParticipanteIndicacao> {
   @AllowNull(true)
   @Column(DataType.STRING(500))
   motivo: string;
+
+  @AllowNull(false)
+  @Is('typePersonValidation', typePersonValidation)
+  @Column(DataType.INTEGER)
+  tipoPessoa: number;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(100))
+  nome: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(100))
+  email: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(11))
+  telefone: string;
+
+  @AllowNull(false)
+  @Is('participantNominationValidation', participantNominationValidation)
+  @Column(DataType.INTEGER)
+  canalEntrada: number;
 
   @AllowNull(true)
   @Column(DataType.INTEGER)

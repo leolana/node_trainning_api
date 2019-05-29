@@ -8,9 +8,11 @@ import { MotivoTipoRecusa } from './MotivoTipoRecusa';
 })
 
 export class MotivoRecusa extends Model<MotivoRecusa> {
+  @AllowNull(true)
   @Column(DataType.STRING(20))
   codigo: string;
 
+  @AllowNull(true)
   @Column(DataType.STRING(100))
   descricao: string;
 

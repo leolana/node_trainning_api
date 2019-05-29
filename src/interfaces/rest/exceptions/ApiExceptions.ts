@@ -371,6 +371,12 @@ export class InvalidAdministrativeRateException extends Errors.BadRequestError {
   }
 }
 
+export class InvalidRateTypeException extends Errors.PreconditionFailedError {
+  constructor() {
+    super('tipo-taxa-invalida');
+  }
+}
+
 export class InvalidPersonTypeException extends Errors.BadRequestError {
   constructor() {
     super('tipoPessoa-invalido');

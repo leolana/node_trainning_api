@@ -1,5 +1,5 @@
 import participanteVinculoStatus from '../../entities/participanteVinculoStatus';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 
 const getBondsUseCase = (db: Sequelize) => async (
   identityName: string,
@@ -11,22 +11,22 @@ const getBondsUseCase = (db: Sequelize) => async (
 
   if (solicitadoEstabelecimento) {
     include.push({
-      model: db.entities.participanteFornecedor,
+      model: (db.models as any).participanteFornecedor,
       as: 'fornecedor',
       attributes: ['participanteId'],
       include: [{
-        model: db.entities.participante,
+        model: (db.models as any).participante,
         as: 'participante',
         attributes: ['id', 'nome', 'documento'],
       }],
     });
   } else {
     include.push({
-      model: db.entities.participanteEstabelecimento,
+      model: (db.models as any).participanteEstabelecimento,
       as: 'estabelecimento',
       attributes: ['participanteId'],
       include: [{
-        model: db.entities.participante,
+        model: (db.models as any).participante,
         as: 'participante',
         attributes: ['id', 'nome', 'documento'],
       }],
@@ -36,9 +36,9 @@ const getBondsUseCase = (db: Sequelize) => async (
   if (statusVinculo === participanteVinculoStatus.reprovado) {
     include.push({
       as: 'recusa',
-      model: db.entities.motivoTipoRecusa,
+      model: (db.models as any).motivoTipoRecusa,
       include: [{
-        model: db.entities.motivoRecusa,
+        model: (db.models as any).motivoRecusa,
         as: 'motivoRecusa',
         attributes: ['id', 'descricao', 'requerObservacao'],
         where: { ativo: true },
@@ -48,11 +48,11 @@ const getBondsUseCase = (db: Sequelize) => async (
     });
   }
 
-  const participante = await db.entities[identityName].findOne({
+  const participante = await (db.models as any)[identityName].findOne({
     where: { participanteId: id },
     include: [{
       include,
-      model: db.entities.participanteVinculo,
+      model: (db.models as any).participanteVinculo,
       as: 'vinculos',
       attributes: [
         'id',

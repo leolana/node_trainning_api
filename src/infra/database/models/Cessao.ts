@@ -1,11 +1,14 @@
 // tslint:disable:no-magic-numbers
-import { Table, Model, Column, DataType, AllowNull, Default, Is, HasMany } from 'sequelize-typescript';
+import { Table, Model, Column, DataType, AllowNull, Default, Is, HasMany, BelongsTo } from 'sequelize-typescript';
 import cessaoStatus from '../../../domain/entities/cessaoStatus';
 import cessaoTipo from '../../../domain/entities/cessaoTipo';
 import cessaoDiluicaoPagamento from '../../../domain/entities/cessaoDiluicaoPagamento';
 import * as Exceptions from '../../../interfaces/rest/exceptions/ApiExceptions';
 import { CessaoAceite } from './CessaoAceite';
 import { CessaoRecebivel } from './CessaoRecebivel';
+import { CessaoStatus } from './CessaoStatus';
+import { ParticipanteVinculo } from '..';
+import { CessaoTipo } from './CessaoTipo';
 @Table({
   timestamps: true,
   tableName: 'cessao'
@@ -28,7 +31,7 @@ export class Cessao extends Model<Cessao> {
   @AllowNull(false)
   @Default(cessaoStatus.aguardandoAprovacao)
   @Column(DataType.SMALLINT)
-  status: number;
+  cessaoStatusId: number;
 
   @AllowNull(false)
   @Column(DataType.FLOAT)
@@ -55,26 +58,6 @@ export class Cessao extends Model<Cessao> {
   referencia: string;
 
   @AllowNull(true)
-  @Column(DataType.INTEGER)
-  codigoRetornoSiscof: number;
-
-  @AllowNull(true)
-  @Column(DataType.STRING(500))
-  mensagemRetornoSiscof: string;
-
-  @AllowNull(true)
-  @Column(DataType.FLOAT)
-  taxaCessao: number;
-
-  @AllowNull(true)
-  @Column(DataType.INTEGER)
-  fornecedorAceiteTermoId: number;
-
-  @AllowNull(true)
-  @Column(DataType.INTEGER)
-  estabelecimentoAceiteTermoId: number;
-
-  @AllowNull(true)
   @Column(DataType.DATE)
   dataRespostaEstabelecimento: Date;
 
@@ -87,21 +70,32 @@ export class Cessao extends Model<Cessao> {
   numeroParcelas: number;
 
   @AllowNull(false)
+  @Is('cessaoTipoValidation', cessaoTipoValidation)
   @Default(cessaoTipo.cessao)
   @Column(DataType.SMALLINT)
-  @Is('cessaoTipoValidation', cessaoTipoValidation)
-  tipo: number;
+  cessaoTipoId: number;
 
   @AllowNull(false)
+  @Is('cessaoDiluicaoValidation', cessaoDiluicaoValidation)
   @Default(cessaoDiluicaoPagamento.diaVencimento)
   @Column(DataType.SMALLINT)
-  @Is('cessaoDiluicaoValidation', cessaoDiluicaoValidation)
   diluicaoPagamento: number;
 
   @HasMany(() => CessaoAceite, 'cessaoId')
   aceites: CessaoAceite[];
+
   @HasMany(() => CessaoRecebivel, 'cessaoId')
   recebiveis: CessaoRecebivel[];
+
+  @BelongsTo(() => CessaoStatus, 'cessaoStatusId')
+  status: CessaoStatus[];
+
+  @BelongsTo(() => CessaoTipo, 'cessaoTipoId')
+  tipos: CessaoTipo[];
+
+  @BelongsTo(() => ParticipanteVinculo, 'participanteVinculoId')
+  vinculos: ParticipanteVinculo[];
+
 }
 
 function statusValidation(value: number[]) {

@@ -1,5 +1,5 @@
 const identifier = db => (supplierDocument) => {
-  const find = document => db.entities.participante
+  const find = document => (db.models as any).participante
     .findOne({
       where: {
         documento: document,

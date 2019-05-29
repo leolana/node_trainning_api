@@ -50,7 +50,7 @@ const getProviderNominationUseCase = db => (
       filter.createdAt.$lte = dataFim;
     }
 
-    return db.entities.participanteIndicacao
+    return (db.models as any).participanteIndicacao
       .findAll({
         attributes: [
           'id',
@@ -66,9 +66,9 @@ const getProviderNominationUseCase = db => (
         where: filter,
         include: [
           {
-            model: db.entities.motivoTipoRecusa,
+            model: (db.models as any).motivoTipoRecusa,
             include: [{
-              model: db.entities.motivoRecusa,
+              model: (db.models as any).motivoRecusa,
               as: 'motivoRecusa',
               attributes: ['id', 'descricao', 'requerObservacao'],
               where: { ativo: true },

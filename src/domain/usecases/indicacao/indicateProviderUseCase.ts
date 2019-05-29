@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import { Mailer } from '../../../infra/mailer';
 import { MailerEnv } from '../../../infra/environment/Environment';
 import { verifyPersonType } from '../../services/types/personTypeEnum';
@@ -29,14 +29,14 @@ const indicateProviderUseCase = (
 
     const statusPendente = participanteVinculoStatus.pendente;
 
-    const participantes = await db.entities.participante.findAll({
+    const participantes = await (db.models as any).participante.findAll({
       where: {
         id: estabelecimentoComercialId,
         ativo: true,
       },
       attributes: ['id', 'nome', 'razaoSocial'],
       include: [{
-        model: db.entities.participanteIndicacao,
+        model: (db.models as any).participanteIndicacao,
         as: 'indicacoes',
         attributes: ['id', 'documento'],
       }],
@@ -53,7 +53,7 @@ const indicateProviderUseCase = (
       throw new Exceptions.AlreadyNominatedProviderException();
     }
 
-    await db.entities.participanteIndicacao.create({
+    await (db.models as any).participanteIndicacao.create({
       documento,
       nome,
       email,

@@ -2,12 +2,12 @@ import { ParticipanteNotFoundException } from '../../../interfaces/rest/exceptio
 
 const getProviderNomineesUseCase = db => async (idEstabelecimento) => {
   const data: any = {};
-  const participanteEstabelecimento = await db.entities.participanteEstabelecimento
+  const participanteEstabelecimento = await (db.models as any).participanteEstabelecimento
     .findOne({
       attributes: ['participanteId'],
       include: [{
         as: 'participante',
-        model: db.entities.participante,
+        model: (db.models as any).participante,
         attributes: ['id', 'documento', 'ativo'],
       }],
     });
@@ -15,12 +15,12 @@ const getProviderNomineesUseCase = db => async (idEstabelecimento) => {
   if (!participanteEstabelecimento) throw new ParticipanteNotFoundException();
   data.participante = participanteEstabelecimento.participante;
 
-  const participanteIndicacao = await db.entities.participanteIndicacao.findAll({
+  const participanteIndicacao = await (db.models as any).participanteIndicacao.findAll({
     where: { participanteId: idEstabelecimento },
     include: [{
-      model: db.entities.motivoTipoRecusa,
+      model: (db.models as any).motivoTipoRecusa,
       include: [{
-        model: db.entities.motivoRecusa,
+        model: (db.models as any).motivoRecusa,
         as: 'motivoRecusa',
         attributes: ['id', 'descricao', 'requerObservacao'],
         where: { ativo: true },

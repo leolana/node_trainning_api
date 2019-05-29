@@ -27,14 +27,6 @@ export class CessaoAceite extends Model<CessaoAceite> {
   @Column(DataType.INTEGER)
   termoId: number;
 
-  @AllowNull(true)
-  @Column(DataType.STRING(500))
-  mensagemSiscof: string;
-
-  @AllowNull(true)
-  @Column(DataType.INTEGER)
-  codRetornoSiscof: number;
-
   @BelongsTo(() => Termo, 'termoId')
   termo: Termo[];
 

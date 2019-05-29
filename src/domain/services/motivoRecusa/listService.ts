@@ -1,12 +1,12 @@
 const listService = db => (recusaTipoId) => {
-  const find = id => db.entities.motivoRecusa
+  const find = id => (db.models as any).motivoRecusa
     .findAll({
       attributes: ['descricao', 'requerObservacao'],
       where: {
         ativo: true,
       },
       include: [{
-        model: db.entities.motivoTipoRecusa,
+        model: (db.models as any).motivoTipoRecusa,
         as: 'tiposRecusa',
         where: { recusaTipoId: id },
         attributes: ['id'],

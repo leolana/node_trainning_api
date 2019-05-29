@@ -10,7 +10,7 @@ const participanteFetchFile = (db, fileStorage) => (
 
   const options = { id };
 
-  return fetch(type, index, document, db.entities.participante, options);
+  return fetch(type, index, document, (db.models as any).participante, options);
 };
 
 export default participanteFetchFile;

@@ -1,3 +1,4 @@
+// tslint:disable: no-magic-numbers
 import { QueryInterface } from 'sequelize';
 
 import { defaultUser } from '../consts';
@@ -7,8 +8,6 @@ import tiposPessoa from '../../../domain/entities/tiposPessoa';
 
 module.exports = {
   up: async (queryInterface: QueryInterface) => {
-    const sequelize = queryInterface.sequelize;
-
     const now = new Date();
     const timestamp = { createdAt: now, updatedAt: now };
 
@@ -39,24 +38,10 @@ module.exports = {
       }
     ];
 
-    const [ecs, fornecedores] = (await Promise.all([
-      sequelize.query(
-        'SELECT "participanteId" FROM "participanteEstabelecimento" LIMIT 1;',
-        { type: sequelize.QueryTypes.SELECT }
-      ),
-      sequelize.query(
-        'SELECT "participanteId" FROM "participanteFornecedor" LIMIT 1;',
-        { type: sequelize.QueryTypes.SELECT }
-      ),
-    ])) as any[][];
-
-    const ec = ecs[0].participanteId;
-    const fornecedor = fornecedores[0].participanteId;
-
     indicacoes.forEach((i) => {
       i.participanteId = i.canalEntrada === participateNominationSourceEnum.indicacaoPorEc
-        ? ec
-        : fornecedor;
+        ? 1
+        : 2;
     });
 
     return queryInterface.bulkInsert('participanteIndicacao', indicacoes, {});

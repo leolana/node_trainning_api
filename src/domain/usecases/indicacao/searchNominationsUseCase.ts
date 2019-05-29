@@ -45,11 +45,11 @@ const searchNominationsUseCase = db => async (searchNominationsOptions) => {
     return filters;
   };
 
-  const search = filters => db.entities.participante
+  const search = filters => (db.models as any).participante
     .findAll({
       attributes: ['id', 'nome'],
       include: [{
-        model: db.entities.participanteIndicacao,
+        model: (db.models as any).participanteIndicacao,
         as: 'indicacoes',
         where: filters,
         attributes: [
@@ -58,9 +58,9 @@ const searchNominationsUseCase = db => async (searchNominationsOptions) => {
         ],
         include: [
           {
-            model: db.entities.motivoTipoRecusa,
+            model: (db.models as any).motivoTipoRecusa,
             include: [{
-              model: db.entities.motivoRecusa,
+              model: (db.models as any).motivoRecusa,
               as: 'motivoRecusa',
               attributes: ['id', 'descricao', 'requerObservacao'],
               where: { ativo: true },
@@ -71,7 +71,7 @@ const searchNominationsUseCase = db => async (searchNominationsOptions) => {
       }],
     });
 
-  const checkIfExists = (data: any[]) => db.entities.credenciamento
+  const checkIfExists = (data: any[]) => (db.models as any).credenciamento
     .findAll({
       where: {
         ativo: true,

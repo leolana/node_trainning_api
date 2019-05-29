@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import testPostgresConnectionUseCase from './testPostgresConnectionUseCase';
 
 export enum healthCheckServicesEnum {

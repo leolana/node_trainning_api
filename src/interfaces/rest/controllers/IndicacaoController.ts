@@ -2,7 +2,7 @@
 import { Router, Response, NextFunction } from 'express';
 import { Request } from 'express-request';
 import { injectable, inject } from 'inversify';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 
 import Controller from '../Controller';
 import { LoggerInterface } from '../../../infra/logging';

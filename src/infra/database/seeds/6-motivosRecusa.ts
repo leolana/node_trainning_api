@@ -1,6 +1,7 @@
 import { QueryInterface } from 'sequelize';
 
 import recusaTipoEnum from '../../../domain/entities/recusaTipoEnum';
+import { MotivoRecusa } from '..';
 
 module.exports = {
   up: async (queryInterface: QueryInterface) => {
@@ -117,14 +118,18 @@ module.exports = {
       ]
     ];
 
-    const inserted = (await queryInterface.bulkInsert('motivoRecusa', motivos, { returning: true })) as any[];
+    const inserted = (await queryInterface.bulkInsert('motivoRecusa', motivos, <any>{ returning: true })
+    ) as MotivoRecusa[];
 
-    const data = tipos.reduce((acc, curr, i) => acc.concat(
-      curr.map((c) => {
-        c.motivoRecusaId = inserted[i].id;
-        return c;
-      }))
-    ,                         []);
+    const data = tipos.reduce(
+      (acc, curr, i) =>
+        acc.concat(
+          curr.map((c) => {
+            c.motivoRecusaId = inserted[i].id;
+            return c;
+          }))
+      ,
+      []);
 
     return queryInterface.bulkInsert('motivoTipoRecusa', data, {});
   },

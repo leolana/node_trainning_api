@@ -1,7 +1,7 @@
 import { Router, Response, NextFunction } from 'express';
 import { Request } from 'express-request';
 import { injectable, inject } from 'inversify';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import * as R from 'ramda';
 
 import Controller from '../Controller';
@@ -171,8 +171,8 @@ class CessaoController implements Controller {
   private getEntity = (req) => {
     const isFornecedor = req.user.participanteFornecedor;
     const fromParticipanteType = isFornecedor
-      ? this.db.entities.participanteFornecedor
-      : this.db.entities.participanteEstabelecimento;
+      ? (this.db.models as any).participanteFornecedor
+      : (this.db.models as any).participanteEstabelecimento;
 
     return {
       dbSet: fromParticipanteType,
@@ -185,13 +185,13 @@ class CessaoController implements Controller {
   private referenceParticipanteType = type => ({
     model:
       type === this.participanteTypes.fornecedor
-        ? this.db.entities.participanteEstabelecimento
-        : this.db.entities.participanteFornecedor,
+        ? (this.db.models as any).participanteEstabelecimento
+        : (this.db.models as any).participanteFornecedor,
     as:
       type === this.participanteTypes.fornecedor ? 'estabelecimento' : 'fornecedor',
     include: [
       {
-        model: this.db.entities.participante,
+        model: (this.db.models as any).participante,
         as: 'participante',
         attributes: ['nome', 'documento'],
       },
@@ -218,13 +218,13 @@ class CessaoController implements Controller {
         resultSiscof.recebiveis.forEach((recebivel) => {
           recebivel.cessaoId = cessao.id;
         });
-        this.db.entities.cessaoRecebivel
+        (this.db.models as any).cessaoRecebivel
           .destroy({
             where: { cessaoId: cessao.id },
           })
           .then(() => {
-            this.db.entities.cessaoRecebivel.bulkCreate(resultSiscof.recebiveis);
-            this.db.entities.cessaoRecebivelHistorico.bulkCreate(
+            (this.db.models as any).cessaoRecebivel.bulkCreate(resultSiscof.recebiveis);
+            (this.db.models as any).cessaoRecebivelHistorico.bulkCreate(
               resultSiscof.recebiveis,
             );
           });
@@ -264,13 +264,13 @@ class CessaoController implements Controller {
         where: { participanteId: id },
         include: [
           {
-            model: this.db.entities.participanteVinculo,
+            model: (this.db.models as any).participanteVinculo,
             as: 'vinculos',
             attributes: ['id'],
             include: [
               this.referenceParticipanteType(entity.type),
               {
-                model: this.db.entities.cessao,
+                model: (this.db.models as any).cessao,
                 as: 'cessoes',
                 attributes: [
                   'id',
@@ -291,8 +291,8 @@ class CessaoController implements Controller {
         ],
         order: [
           [
-            { model: this.db.entities.participanteVinculo, as: 'vinculos' },
-            { model: this.db.entities.cessao, as: 'cessoes' },
+            { model: (this.db.models as any).participanteVinculo, as: 'vinculos' },
+            { model: (this.db.models as any).cessao, as: 'cessoes' },
             'createdAt', 'DESC'
           ]
         ]
@@ -376,7 +376,7 @@ class CessaoController implements Controller {
     const collection: any = {};
 
     const listEventos = () => {
-      return this.db.entities.evento
+      return (this.db.models as any).evento
         .findAll({
           attributes: ['id', 'nome'],
         })
@@ -386,7 +386,7 @@ class CessaoController implements Controller {
     };
 
     const listBandeiras = () => {
-      return this.db.entities.bandeira
+      return (this.db.models as any).bandeira
         .findAll({
           where: {
             ativo: true,
@@ -404,11 +404,11 @@ class CessaoController implements Controller {
           where: { participanteId },
           include: [
             {
-              model: this.db.entities.participanteVinculo,
+              model: (this.db.models as any).participanteVinculo,
               as: 'vinculos',
               include: [
                 {
-                  model: this.db.entities.cessao,
+                  model: (this.db.models as any).cessao,
                   as: 'cessoes',
                   where: { id: cessaoId },
                   attributes: [
@@ -430,7 +430,7 @@ class CessaoController implements Controller {
                   ],
                 },
                 {
-                  model: this.db.entities.participanteVinculoRecorrente,
+                  model: (this.db.models as any).participanteVinculoRecorrente,
                   as: 'recorrentes',
                   attributes: ['valorMaximo', 'dataFinalVigencia'],
                   where: {
@@ -574,7 +574,7 @@ class CessaoController implements Controller {
     const participanteId = req.user.participante;
 
     const get = () => {
-      return this.db.entities.participanteVinculo.findOne({
+      return (this.db.models as any).participanteVinculo.findOne({
         attributes: ['id'],
         where: {
           $or: {
@@ -584,7 +584,7 @@ class CessaoController implements Controller {
         },
         include: [
           {
-            model: this.db.entities.cessao,
+            model: (this.db.models as any).cessao,
             as: 'cessoes',
             where: {
               id: cessaoId,
@@ -637,7 +637,7 @@ class CessaoController implements Controller {
     const dataVencimento = new Date(req.query.dataVencimento);
 
     const getVinculo = () => {
-      return this.db.entities.participanteVinculo.findOne({
+      return (this.db.models as any).participanteVinculo.findOne({
         where: { id: vinculoId },
         attributes: [
           'participanteEstabelecimentoId',

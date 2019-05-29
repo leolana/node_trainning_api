@@ -1,10 +1,9 @@
 import { Router, Response, NextFunction } from 'express';
 import { Request } from 'express-request';
 import { injectable, inject } from 'inversify';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 
 import Controller from '../Controller';
-import credenciamentoStatusEnum from '../../../domain/entities/credenciamentoStatusEnum';
 import { SiscofConnector } from '../../../infra/siscof';
 import Auth from '../../../infra/auth/Auth';
 import { Mailer } from '../../../infra/mailer';
@@ -85,12 +84,12 @@ class HealthController implements Controller {
 
   getStatusCessoes = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     return Promise.all([
-      this.db.entities.cessao.findAll({
+      (this.db.models as any).cessao.findAll({
         limit: 1,
         attributes: ['createdAt'],
         order: [['createdAt', 'DESC']]
       }),
-      this.db.entities.cessao.count({})
+      (this.db.models as any).cessao.count({})
     ])
       .then(results => res.send({
         result: true,
@@ -105,7 +104,7 @@ class HealthController implements Controller {
   }
 
   getMigrations = async (req: Request, res: Response, next: NextFunction) => {
-    const migrations = this.db.entities._migration.findAll({
+    const migrations = (this.db.models as any)._migration.findAll({
       attributes: ['key', 'executedAt'],
       order: [['executedAt', 'DESC']]
     });

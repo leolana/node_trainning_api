@@ -4,7 +4,6 @@ import {
   MonitorEnv,
   SwaggerEnv,
   HealthCheckEnv,
-  MovideskEnv,
   ParamStoreEnv
 } from './infra/environment/Environment';
 import * as pkg from '../package.json';
@@ -20,8 +19,6 @@ export const config: Environment = {
     banner: true,
     uri: 'http://localhost',
   } as AppEnv,
-  movidesk: {
-  } as MovideskEnv,
   paramStore: {
     enabled: false
   } as ParamStoreEnv,

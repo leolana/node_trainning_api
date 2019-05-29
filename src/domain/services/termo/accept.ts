@@ -12,7 +12,7 @@ const accept = db => (id, participanteId, user) => {
       throw new Error('termo-nao-encontrado');
     }
 
-    return db.entities.participanteAceiteTermo.create({
+    return (db.models as any).participanteAceiteTermo.create({
       participanteId,
       termoId: termo.id,
       usuario: user,

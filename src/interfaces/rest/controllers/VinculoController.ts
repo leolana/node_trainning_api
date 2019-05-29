@@ -2,7 +2,7 @@
 import { Router, Response, NextFunction } from 'express';
 import { Request } from 'express-request';
 import { injectable, inject } from 'inversify';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 
 import Controller from '../Controller';
 import { LoggerInterface } from '../../../infra/logging';
@@ -257,14 +257,14 @@ class ParticipantesController implements Controller {
 
   notificarVinculos = (vinculo) => {
     const contatoInclude = () => ({
-      model: this.db.entities.participanteContato,
+      model: (this.db.models as any).participanteContato,
       as: 'contatos',
       attributes: ['participanteId', 'email'],
       where: { ativo: true },
     });
 
     const participanteInclude = () => ({
-      model: this.db.entities.participante,
+      model: (this.db.models as any).participante,
       as: 'participante',
       attributes: ['id', 'nome'],
       include: [contatoInclude()],
@@ -272,12 +272,12 @@ class ParticipantesController implements Controller {
     });
 
     return Promise.all([
-      this.db.entities.participanteFornecedor.findOne({
+      (this.db.models as any).participanteFornecedor.findOne({
         where: { participanteId: vinculo.participanteFornecedorId },
         attributes: ['participanteId'],
         include: [participanteInclude()],
       }),
-      this.db.entities.participanteEstabelecimento.findOne({
+      (this.db.models as any).participanteEstabelecimento.findOne({
         where: { participanteId: vinculo.participanteEstabelecimentoId },
         attributes: ['participanteId'],
         include: [participanteInclude()],
@@ -352,14 +352,14 @@ class ParticipantesController implements Controller {
     if (solicitadoEstabelecimento === false) return Promise.resolve();
 
     const contatoInclude = () => ({
-      model: this.db.entities.participanteContato,
+      model: (this.db.models as any).participanteContato,
       as: 'contatos',
       attributes: ['participanteId', 'email'],
       where: { ativo: true },
     });
 
     const participanteInclude = () => ({
-      model: this.db.entities.participante,
+      model: (this.db.models as any).participante,
       as: 'participante',
       attributes: ['id', 'nome'],
       include: [contatoInclude()],
@@ -367,12 +367,12 @@ class ParticipantesController implements Controller {
     });
 
     return Promise.all([
-      this.db.entities.participanteFornecedor.findOne({
+      (this.db.models as any).participanteFornecedor.findOne({
         where: { participanteId: vinculo.participanteFornecedorId },
         attributes: ['participanteId'],
         include: [participanteInclude()],
       }),
-      this.db.entities.participanteEstabelecimento.findOne({
+      (this.db.models as any).participanteEstabelecimento.findOne({
         where: { participanteId: vinculo.participanteEstabelecimentoId },
         attributes: ['participanteId'],
         include: [participanteInclude()],
@@ -430,7 +430,7 @@ class ParticipantesController implements Controller {
         where.participanteFornecedorId = participanteId;
       }
 
-      return this.db.entities.participanteVinculo
+      return (this.db.models as any).participanteVinculo
         .findOne({ where })
         .then((vinculo) => {
           if (!vinculo) {
@@ -446,7 +446,7 @@ class ParticipantesController implements Controller {
 
           return Promise.all([
             vinculo.save(),
-            this.db.entities.participanteVinculoHistorico.create({
+            (this.db.models as any).participanteVinculoHistorico.create({
               participanteEstabelecimentoId: vinculo.participanteEstabelecimentoId,
               participanteFornecedorId: vinculo.participanteFornecedorId,
               status: vinculo.status,
@@ -472,10 +472,10 @@ class ParticipantesController implements Controller {
   obterVinculo = async (req: Request, res: Response, next: NextFunction) => {
     const vinculoId = +req.params.id;
     const include = [{
-      model: this.db.entities.participanteEstabelecimento,
+      model: (this.db.models as any).participanteEstabelecimento,
       as: 'estabelecimento',
       include: [{
-        model: this.db.entities.participante,
+        model: (this.db.models as any).participante,
         as: 'participante',
         attributes: ['id', 'documento', 'nome'],
       }],

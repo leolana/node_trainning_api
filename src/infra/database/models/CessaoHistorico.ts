@@ -1,6 +1,8 @@
 // tslint:disable:no-magic-numbers
 import { Table, Model, Column, DataType, AllowNull, Default, Is, BelongsTo } from 'sequelize-typescript';
+import cessaoTipo from '../../../domain/entities/cessaoTipo';
 import cessaoRecebivelStatus from '../../../domain/entities/cessaoRecebivelStatus';
+import cessaoDiluicaoPagamento from '../../../domain/entities/cessaoDiluicaoPagamento';
 import * as Exceptions from '../../../interfaces/rest/exceptions/ApiExceptions';
 import { Cessao } from './Cessao';
 @Table({
@@ -29,7 +31,7 @@ export class CessaoHistorico extends Model<CessaoHistorico> {
   @AllowNull(false)
   @Default(cessaoRecebivelStatus.pagamentoPendente)
   @Column(DataType.SMALLINT)
-  status: number;
+  cessaoStatusId: number;
 
   @AllowNull(false)
   @Column(DataType.FLOAT)
@@ -56,32 +58,22 @@ export class CessaoHistorico extends Model<CessaoHistorico> {
   referencia: string;
 
   @AllowNull(true)
-  @Column(DataType.INTEGER)
-  codigoRetornoSiscof: number;
-
-  @AllowNull(true)
-  @Column(DataType.STRING(500))
-  mensagemRetornoSiscof: string;
-
-  @AllowNull(true)
-  @Column(DataType.FLOAT)
-  taxaCessao: number;
-
-  @AllowNull(true)
-  @Column(DataType.INTEGER)
-  fornecedorAceiteTermoId: number;
-
-  @AllowNull(true)
-  @Column(DataType.INTEGER)
-  estabelecimentoAceiteTermoId: number;
-
-  @AllowNull(true)
   @Column(DataType.DATE)
   dataRespostaEstabelecimento: Date;
 
   @AllowNull(true)
   @Column(DataType.STRING(100))
   usuarioRespostaEstabelecimento: string;
+
+  @AllowNull(false)
+  @Is('cessaoTipoValidation', cessaoTipoValidation)
+  @Column(DataType.SMALLINT)
+  cessaoTipoId: number;
+
+  @AllowNull(false)
+  @Is('cessaoDiluicaoValidation', cessaoDiluicaoValidation)
+  @Column(DataType.SMALLINT)
+  diluicaoPagamento: number;
 
   @AllowNull(true)
   @Column(DataType.SMALLINT)
@@ -96,5 +88,21 @@ function statusRecebivelValidation(value: number[]) {
 
   if (value.some(v => !status.includes(v))) {
     throw new Exceptions.InvalidCessionStatusException();
+  }
+}
+
+function cessaoTipoValidation(value: number[]) {
+  const tipo = Object.values(cessaoTipo);
+
+  if (value.some(v => !tipo.includes(v))) {
+    throw new Exceptions.InvalidCessionTypeException();
+  }
+}
+
+function cessaoDiluicaoValidation(value: number[]) {
+  const diluicao = Object.values(cessaoDiluicaoPagamento);
+
+  if (value.some(v => !diluicao.includes(v))) {
+    throw new Exceptions.InvalidCessionPaymentException();
   }
 }

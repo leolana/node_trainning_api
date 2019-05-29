@@ -46,6 +46,19 @@ export class ParticipanteVinculoHistorico extends Model<ParticipanteVinculoHisto
   @AllowNull(true)
   @Column(DataType.FLOAT)
   valorMaximoExibicao: number;
+
+  @AllowNull(true)
+  @Column(DataType.INTEGER)
+  motivoTipoRecusaId: number;
+
+  @AllowNull(true)
+  @Column(DataType.STRING(500))
+  motivoRecusaObservacao: string;
+
+  @AllowNull(false)
+  @Column(DataType.BOOLEAN)
+  estabelecimentoSolicitouVinculo: boolean;
+
 }
 
 function statusValidation(value: number[]) {

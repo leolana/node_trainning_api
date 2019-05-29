@@ -1,7 +1,7 @@
 
 const updateProviderNomineesUseCase = db => (indicacao, idEC) => {
   const findIndication = () => {
-    return db.entities.participanteIndicacao
+    return (db.models as any).participanteIndicacao
       .findAll({
         where: { id: indicacao.participanteIndicacaoId },
       });
@@ -9,7 +9,7 @@ const updateProviderNomineesUseCase = db => (indicacao, idEC) => {
 
   const updateNominees = (indication) => {
     if (!indication) throw new Error('indication-not-found');
-    return db.entities.participanteIndicacao.update(
+    return (db.models as any).participanteIndicacao.update(
       {
         nome: indicacao.nome,
         telefone: indicacao.telefone,

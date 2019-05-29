@@ -8,7 +8,7 @@ import { paramsEnum as accountParams } from '../../domain/services/account/param
 import { typeEnum as tiposParticipante } from '../../domain/services/participante/typeEnum';
 import termoTipo from '../../domain/entities/termoTipo';
 import { rolesEnum } from '../../domain/services/auth/rolesEnum';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import Mailer from '../mailer/Mailer';
 import Auth from './Auth';
 import { Environment, AuthEnv } from '../environment/Environment';
@@ -114,10 +114,10 @@ class AuthProd implements Auth {
   generateSessionToken = (emailUsuario, participante, impersonating) => {
     let promise = impersonating
       ? Promise.resolve(participante)
-      : this.db.entities.usuario.findOne({
+      : (this.db.models as any).usuario.findOne({
         where: { email: emailUsuario },
         include: [{
-          model: this.db.entities.membro,
+          model: (this.db.models as any).membro,
           as: 'associacoes',
           attributes: ['participanteId'],
         }],
@@ -134,14 +134,14 @@ class AuthProd implements Auth {
     promise = promise.then(participanteId => (!participanteId
       ? Promise.resolve({})
       : Promise.all([
-        this.db.entities.participante.findOne({
+        (this.db.models as any).participante.findOne({
           where: { id: participanteId },
           attributes: ['nome'],
         }),
-        this.db.entities.participanteEstabelecimento.count({
+        (this.db.models as any).participanteEstabelecimento.count({
           where: { participanteId },
         }),
-        this.db.entities.participanteFornecedor.count({
+        (this.db.models as any).participanteFornecedor.count({
           where: { participanteId },
         }),
       ]).then(results => ({
@@ -161,7 +161,7 @@ class AuthProd implements Auth {
           now.getDate()
         );
 
-        return this.db.entities.termo.findOne({
+        return (this.db.models as any).termo.findOne({
           where: {
             inicio: { $lte: today },
             fim: {
@@ -175,7 +175,7 @@ class AuthProd implements Auth {
               : termoTipo.contratoMaeFornecedor,
           },
           include: [{
-            model: this.db.entities.participanteAceiteTermo,
+            model: (this.db.models as any).participanteAceiteTermo,
             as: 'aceites',
             where: {
               participanteId: result.participante,
@@ -281,10 +281,10 @@ class AuthProd implements Auth {
   }
 
   inviteUser = (convite, transaction) => {
-    const findUser = () => this.db.entities.usuario.findOne({
+    const findUser = () => (this.db.models as any).usuario.findOne({
       where: { email: convite.email },
       include: [{
-        model: this.db.entities.membro,
+        model: (this.db.models as any).membro,
         as: 'associacoes',
       }],
     });
@@ -304,7 +304,7 @@ class AuthProd implements Auth {
         usuario.update(
           { roles: usuario.roles },
           { transaction }),
-        this.db.entities.membro.create(
+        (this.db.models as any).membro.create(
           {
             usuarioId: usuario.id,
             participanteId: convite.participante,
@@ -325,7 +325,7 @@ class AuthProd implements Auth {
 
       convite.expiraEm = dataExpiracao;
 
-      return this.db.entities.usuarioConvite
+      return (this.db.models as any).usuarioConvite
         .create(convite, { transaction })
         .then(novoConvite => this.mailer.enviar(
           {
@@ -347,10 +347,10 @@ class AuthProd implements Auth {
   addRoleKc = async (email, roles, pwd) => {
     if (pwd !== 'xpto') return {};
 
-    const usuario = await this.db.entities.usuario.findOne({
+    const usuario = await (this.db.models as any).usuario.findOne({
       where: { email },
       include: [{
-        model: this.db.entities.membro,
+        model: (this.db.models as any).membro,
         as: 'associacoes',
       }],
     });
@@ -511,7 +511,7 @@ class AuthProd implements Auth {
 
     solicitacao.expiraEm = dataExpiracao;
 
-    return this.db.entities.usuarioSolicitacaoSenha
+    return (this.db.models as any).usuarioSolicitacaoSenha
       .create(solicitacao)
       .then(novaSolicitacao => this.mailer.enviar(
         {

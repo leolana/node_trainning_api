@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import { healthCheckServicesEnum } from '.';
 
 const testPostgresConnectionUseCase = (db: Sequelize) => async () => {

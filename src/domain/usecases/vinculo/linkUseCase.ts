@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import { SiscofWrapper } from '../../../infra/siscof';
 import { Mailer } from '../../../infra/mailer';
 import { MailerEnv } from '../../../infra/environment/Environment';
@@ -28,14 +28,14 @@ const linkUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper, mailer: Mailer
   }
 
   const contatoInclude = {
-    model: db.entities.participanteContato,
+    model: (db.models as any).participanteContato,
     as: 'contatos',
     attributes: ['participanteId', 'email'],
     where: { ativo: true },
   };
 
   const participanteInclude = {
-    model: db.entities.participante,
+    model: (db.models as any).participante,
     as: 'participante',
     attributes: ['id', 'nome'],
     include: [contatoInclude],
@@ -43,7 +43,7 @@ const linkUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper, mailer: Mailer
   };
 
   const vinculoInclude = {
-    model: db.entities.participanteVinculo,
+    model: (db.models as any).participanteVinculo,
     as: 'vinculos',
     attributes: [
       'id',
@@ -57,7 +57,7 @@ const linkUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper, mailer: Mailer
     participanteFornecedorId,
     estabelecimentoSolicitouVinculo,
     statusVinculo
-  ) => db.entities.participanteVinculo.create({
+  ) => (db.models as any).participanteVinculo.create({
     participanteEstabelecimentoId,
     participanteFornecedorId,
     estabelecimentoSolicitouVinculo,
@@ -69,12 +69,12 @@ const linkUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper, mailer: Mailer
   });
 
   const [fornecedor, estabelecimento] = await Promise.all([
-    db.entities.participanteFornecedor.findOne({
+    (db.models as any).participanteFornecedor.findOne({
       where: { participanteId: fornId },
       attributes: ['participanteId'],
       include: [participanteInclude, vinculoInclude],
     }),
-    db.entities.participanteEstabelecimento.findOne({
+    (db.models as any).participanteEstabelecimento.findOne({
       where: { participanteId: estabelecimentoComercialId },
       attributes: ['participanteId'],
       include: [participanteInclude, vinculoInclude],
