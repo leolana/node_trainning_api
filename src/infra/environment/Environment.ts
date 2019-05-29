@@ -16,22 +16,6 @@ export type DatabaseEnv = {
   logging: boolean
 };
 
-export type SiscofEnv = {
-  enableMock: boolean,
-  user: string,
-  password: string,
-  connectString: string,
-  poolAlias: string,
-  _enableStats: boolean,
-  poolIncrement: number,
-  poolMin: number,
-  poolMax: number,
-  poolPingInterval: number,
-  poolTimeout: number,
-  queueRequests: boolean,
-  queueTimeout: number,
-};
-
 export type AuthEnv = {
   enableMock: boolean,
   address: string,
@@ -53,12 +37,6 @@ export type InternalApiEnv = {
     auth: string,
     address: string,
   },
-};
-
-export type MovideskEnv = {
-  enableMock: boolean,
-  address: string,
-  token: string
 };
 
 export type StorageEnv = {
@@ -110,10 +88,8 @@ export type Environment = {
   app: AppEnv,
   log: LogEnv,
   db: DatabaseEnv,
-  siscof: SiscofEnv,
   auth: AuthEnv,
   internalApis: InternalApiEnv,
-  movidesk: MovideskEnv,
   storage: StorageEnv,
   paramStore: ParamStoreEnv,
   mailer: MailerEnv,

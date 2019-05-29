@@ -28,7 +28,7 @@ const resolve = (db, siscofWrapper) => async (
   const action = db.transaction((t) => {
     const promises = [
       cessao.save({ transaction: t }),
-      db.entities.cessaoAceite.create(
+      (db.models as any).CessaoAceite.create(
         {
           termoId,
           cessaoId: cessao.id,

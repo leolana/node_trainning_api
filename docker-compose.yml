@@ -1,60 +1,33 @@
 version: '3.1'
 services:
-  securitizacao-db:
+  sec_db:
     image: postgres:10.5-alpine
-    restart: always
+    restart: on-failure
     environment:
-      POSTGRES_PASSWORD: p4SSW0rd
-      POSTGRES_DB: alpe
-    ports:
-      - 5432:5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sa
+      POSTGRES_DB: sec_db
     volumes:
-      - vl-securitizacao-db:/var/lib/postgresql/data
-  securitizacao:
-    restart: always
-    depends_on:
-      - securitizacao-db
+      - vl-sec_db:/var/lib/postgresql/data
+    ports:
+     - "5433:5432"
+  staging-sec-api:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+     - ./:/opt/app
+    working_dir: /opt/app
+    env_file: ./.env
     ports:
-      - 8080:8080
-      - 9229:9229
-      - 9330:9330
-    environment:
-      ALPE_CONNECTION_STRING: postgres://postgres:p4SSW0rd@securitizacao-db:5432/alpe
-      ALPE_DATABASE_LOGGING: "false"
-      ALPE_KEYCLOAK_ADDRESS: https://sso-dev.yandeh.com.br/auth/realms/Alpe/protocol/openid-connect/token
-      ALPE_KEYCLOAK_CLIENT_ID: alpe-bko
-      ALPE_KEYCLOAK_CLIENT_SECRET:
-      ALPE_KEYCLOAK_PUBLIC_KEY:
-      ALPE_STORAGE_REGION: us-east-1
-      ALPE_STORAGE_BUCKET: alpe-credenciamento
-      ALPE_SES_REGION: us-east-1
-      ALPE_APIS_BANCOS_ADDRESS: http://alpe-api-bancos-dev.us-east-1.elasticbeanstalk.com/v1/bancos
-      ALPE_APIS_CEPS_ADDRESS: http://alpe-api-cep-dev.us-east-1.elasticbeanstalk.com/v1/cep
-      ALPE_SISCOF_USER: "itlab"
-      ALPE_SISCOF_PASSWORD: ""
-      ALPE_SISCOF_CONNECTSTRING: "127.0.0.2:1522/dbsiscof"
-      ALPE_KEYCLOAK_ADMIN_USERNAME:
-      ALPE_KEYCLOAK_ADMIN_PASSWORD:
-      ALPE_KEYCLOAK_CLIENT_UUID:
-      ALPE_KEYCLOAK_REALM:
-      ALPE_APIS_FINANCIAL_LOGIN:
-      ALPE_APIS_FINANCIAL_PWD:
-      ALPE_APIS_FINANCIAL_ADDRESS:
-      ALPE_LOGS_STDOUT_LEVEL:
-      ALPE_LOGS_STDERR_LEVEL:
-      ALPE_MAILER_ORIGIN:
-      ALPE_URL: "https://securitizacao.alpe-dev.com.br"
-      ALPE_DATABASE_SYNC: 'false'
-      ALPE_MAILING_LIST: 'gestor@alpenet.com.br'
-      ALPE_SENTRY_DSN: 'https://79f2165f8f6f4b05ad75cc542927524e@sentry.io/1362831'
-      ALPE_APIS_MOVIDESK: 'https://api.movidesk.com/public/v1'
-      ALPE_MOVIDESK_TOKEN: 'dca7ac49-71a3-45dc-a5f5-3317e78ec587'
+     - "3000:3000"
+     - "9000:9000"
+    depends_on:
+      - sec_db
+    command: ash -c "npm run build && npm start"
 
 volumes:
-  vl-securitizacao-db:
+  vl-sec_db:
     driver_opts:
       type: tmpfs
       device: tmpfs

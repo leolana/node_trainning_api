@@ -1,7 +1,7 @@
 import { Router, Response, NextFunction } from 'express';
 import { Request } from 'express-request';
 import { injectable, inject } from 'inversify';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import Controller from '../Controller';
 import { LoggerInterface } from '../../../infra/logging';
 import credenciamentoStatusEnum from '../../../domain/entities/credenciamentoStatusEnum';
@@ -63,7 +63,7 @@ class MenuController implements Controller {
 
     if (ehBackoffice) {
       add(
-        this.db.entities.credenciamento.count({
+        (this.db.models as any).Credenciamento.count({
           where: { status: credenciamentoStatusEnum.pendente, ativo: true },
         }).then((amount) => {
           menu.bulletCredenciamentoPendente = amount;
@@ -71,7 +71,7 @@ class MenuController implements Controller {
       );
 
       add(
-        this.db.entities.participanteIndicacao.count({
+        (this.db.models as any).ParticipanteIndicacao.count({
           where: {
             canalEntrada: participateNominationSourceEnum.indicacaoPorFornecedor,
             status: participanteVinculoStatus.pendente,
@@ -82,7 +82,7 @@ class MenuController implements Controller {
       );
 
       add(
-        this.db.entities.participanteIndicacao.count({
+        (this.db.models as any).ParticipanteIndicacao.count({
           where: {
             canalEntrada: participateNominationSourceEnum.indicacaoPorEc,
             status: participanteVinculoStatus.pendente,
@@ -95,7 +95,7 @@ class MenuController implements Controller {
 
     if (ehEstabelecimento) {
       add(
-        this.db.entities.participanteVinculo.count({
+        (this.db.models as any).ParticipanteVinculo.count({
           where: {
             participanteEstabelecimentoId: +user.participante,
             status: participanteVinculoStatus.pendente,
@@ -108,7 +108,7 @@ class MenuController implements Controller {
 
     if (ehEstabelecimento || ehFornecedor) {
       add(
-        this.db.entities.participanteVinculo.findAll({
+        (this.db.models as any).ParticipanteVinculo.findAll({
           attributes: ['id'],
           where: {
             // Investigar o motivo de não aceitar essa sintaxe
@@ -118,7 +118,7 @@ class MenuController implements Controller {
             ] as any),
           },
           include: [{
-            model: this.db.entities.cessao,
+            model: (this.db.models as any).Cessao,
             as: 'cessoes',
             required: true,
             attributes: ['id'],

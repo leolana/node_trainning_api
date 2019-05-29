@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon';
 import deformatDocument from '../../services/document/deformatDocument';
+import { Sequelize } from 'sequelize-typescript';
 
-const searchNominationsUseCase = db => async (searchNominationsOptions) => {
+const searchNominationsUseCase = (db: Sequelize) => async (searchNominationsOptions) => {
   const fields = [
     'tipoPessoa',
     'documento',
@@ -45,33 +46,35 @@ const searchNominationsUseCase = db => async (searchNominationsOptions) => {
     return filters;
   };
 
-  const search = filters => db.entities.participante
-    .findAll({
-      attributes: ['id', 'nome'],
-      include: [{
-        model: db.entities.participanteIndicacao,
-        as: 'indicacoes',
-        where: filters,
-        attributes: [
-          'id', 'nome', 'documento', 'email', 'telefone', 'status',
-          'tipoPessoa', 'canalEntrada', 'dataFimIndicacao', 'motivo',
-        ],
-        include: [
-          {
-            model: db.entities.motivoTipoRecusa,
-            include: [{
-              model: db.entities.motivoRecusa,
-              as: 'motivoRecusa',
-              attributes: ['id', 'descricao', 'requerObservacao'],
-              where: { ativo: true },
-            }],
-          },
-        ],
-        required: true,
-      }],
-    });
+  const search = (filters) => {
+    return (db.models as any).Participante
+      .findAll({
+        attributes: ['id', 'nome'],
+        include: [{
+          model: (db.models as any).ParticipanteIndicacao,
+          as: 'indicacoes',
+          where: filters,
+          attributes: [
+            'id', 'nome', 'documento', 'email', 'telefone', 'status',
+            'tipoPessoa', 'canalEntrada', 'dataFimIndicacao', 'motivo',
+          ],
+          include: [
+            {
+              model: (db.models as any).MotivoTipoRecusa,
+              include: [{
+                model: (db.models as any).MotivoRecusa,
+                as: 'motivoRecusa',
+                attributes: ['id', 'descricao', 'requerObservacao'],
+                where: { ativo: true },
+              }],
+            },
+          ],
+          required: true,
+        }],
+      });
+  };
 
-  const checkIfExists = (data: any[]) => db.entities.credenciamento
+  const checkIfExists = (data: any[]) => (db.models as any).Credenciamento
     .findAll({
       where: {
         ativo: true,
@@ -85,10 +88,10 @@ const searchNominationsUseCase = db => async (searchNominationsOptions) => {
       return acc.concat(current.indicacoes.map(n => ({
         ...n.dataValues,
         motivo: n.motivoTipoRecusa
-        && n.motivoTipoRecusa.motivoRecusa
-        && !n.motivoTipoRecusa.motivoRecusa.requerObservacao
-        ? n.motivoTipoRecusa.motivoRecusa.descricao
-        : n.motivo,
+          && n.motivoTipoRecusa.motivoRecusa
+          && !n.motivoTipoRecusa.motivoRecusa.requerObservacao
+          ? n.motivoTipoRecusa.motivoRecusa.descricao
+          : n.motivo,
         solicitanteId: current.id,
         solicitanteNome: current.nome,
       })));

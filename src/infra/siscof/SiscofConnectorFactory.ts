@@ -18,11 +18,11 @@ class SiscofConnectorFactory {
 
   create(): SiscofConnector {
     const config = this.context.container.get<Environment>(types.Environment);
-    const siscofConnector: SiscofConnector = (config.isDevelopment || config.isTesting) && config.siscof.enableMock
+    const siscofConnector: SiscofConnector = (config.isDevelopment || config.isTesting)
       ? this.context.container.get<SiscofConnectorDev>(types.SiscofConnectorDev)
       : this.context.container.get<SiscofConnectorProd>(types.SiscofConnectorProd);
 
-    return siscofConnector;
+    return (siscofConnector);
   }
 }
 

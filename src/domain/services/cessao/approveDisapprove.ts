@@ -11,14 +11,14 @@ const approveDisapprove = (
   logger
 ) => (aprovado, participanteId, cessaoId, termoId, user) => {
   const contatoInclude = () => ({
-    model: db.entities.participanteContato,
+    model: (db.models as any).ParticipanteContato,
     as: 'contatos',
     attributes: ['participanteId', 'email'],
     where: { ativo: true },
   });
 
   const participanteInclude = () => ({
-    model: db.entities.participante,
+    model: (db.models as any).Participante,
     as: 'participante',
     attributes: ['id', 'nome'],
     include: [contatoInclude()],
@@ -30,17 +30,17 @@ const approveDisapprove = (
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     return {
-      model: db.entities.participanteVinculo,
+      model: (db.models as any).ParticipanteVinculo,
       as: 'vinculos',
       attributes: ['id', 'participanteFornecedorId'],
       include: [
         {
-          model: db.entities.cessao,
+          model: (db.models as any).Cessao,
           as: 'cessoes',
           where: { id: cessaoId },
         },
         {
-          model: db.entities.participanteVinculoRecorrente,
+          model: (db.models as any).ParticipanteVinculoRecorrente,
           as: 'recorrentes',
           where: {
             status: [participanteVinculoStatus.pendente, participanteVinculoStatus.aprovado],
@@ -54,7 +54,7 @@ const approveDisapprove = (
     };
   };
 
-  return db.entities.participanteEstabelecimento
+  return (db.models as any).ParticipanteEstabelecimento
     .findOne({
       where: { participanteId },
       attributes: ['participanteId'],
@@ -83,7 +83,7 @@ const approveDisapprove = (
         recorrencia,
         user,
       ).then(() => {
-        const action = db.entities.participanteFornecedor
+        const action = (db.models as any).ParticipanteFornecedor
           .findOne({
             where: { participanteId: vinculo.participanteFornecedorId },
             attributes: ['participanteId'],

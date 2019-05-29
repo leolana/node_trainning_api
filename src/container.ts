@@ -1,5 +1,5 @@
 import { Container, interfaces } from 'inversify';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 
 import { DatabaseFactory } from './infra/database';
 import Application from './Application';
@@ -22,7 +22,6 @@ import { Auth, AuthDev, AuthProd, AuthFactory } from './infra/auth';
 import { FileStorage, FileStorageAWS, FileStorageDev, FileStorageFactory } from './infra/fileStorage';
 import { InternalApis, InternalApisDev, InternalApisProd } from './infra/internalApis';
 import EnvironmentFactory from './infra/environment/EnvironmentFactory';
-import { PersonAPI, PersonAPIDev, PersonAPIProd } from './infra/movidesk';
 import { Environment } from './infra/environment/Environment';
 
 import CessionService from './domain/services/CessionService';
@@ -30,7 +29,6 @@ import VinculoService from './domain/services/VinculoService';
 
 import types from './constants/types';
 import InternalApisFactory from './infra/internalApis/InternalApisFactory';
-import PersonAPIFactory from './infra/movidesk/PersonAPIFactory';
 import SiscofConnectorFactory from './infra/siscof/SiscofConnectorFactory';
 
 const container = new Container();
@@ -98,21 +96,9 @@ container
     };
   });
 
-container.bind<PersonAPIDev>(types.PersonAPIDev).to(PersonAPIDev);
-container.bind<PersonAPIProd>(types.PersonAPIProd).to(PersonAPIProd);
-container
-  .bind<interfaces.Factory<PersonAPI>>(types.PersonAPIFactory)
-  .toFactory<PersonAPI>((context: interfaces.Context) => {
-    return () => {
-      const factory = new PersonAPIFactory(context);
-
-      return factory.create();
-    };
-  });
-
 container.bind<SiscofCmd>(types.SiscofCmd).to(SiscofCmd);
-container.bind<SiscofDb>(types.SiscofDb).toDynamicValue((context: interfaces.Context) => {
-  const siscofDbBootstrapper = new SiscofDbBootstrapper(context);
+container.bind<SiscofDb>(types.SiscofDb).toDynamicValue(() => {
+  const siscofDbBootstrapper = new SiscofDbBootstrapper();
   return siscofDbBootstrapper.create();
 }).inSingletonScope();
 

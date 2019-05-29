@@ -5,7 +5,7 @@ import participanteIndicacaoStatus from '../../../domain/entities/participanteIn
 const rejectNomination = (db, mailer) => (document, reasonId, reason, user) => {
   const updateNomination = (
     documento, motivoTipoRecusaId, motivo, usuarioResposta
-  ) => db.entities.participanteIndicacao
+  ) => (db.models as any).ParticipanteIndicacao
     .update(
     {
       motivoTipoRecusaId,
@@ -19,26 +19,26 @@ const rejectNomination = (db, mailer) => (document, reasonId, reason, user) => {
     }
     );
 
-  const findById = nominationId => db.entities.participanteIndicacao
+  const findById = nominationId => (db.models as any).ParticipanteIndicacao
     .findById(nominationId[0]);
 
   const findEstablishment = (nomination) => {
     const contatoInclude = () => ({
-      model: db.entities.participanteContato,
+      model: (db.models as any).ParticipanteContato,
       as: 'contatos',
       attributes: ['participanteId', 'email'],
       where: { ativo: true },
     });
 
     const participanteInclude = () => ({
-      model: db.entities.participante,
+      model: (db.models as any).Participante,
       as: 'participante',
       attributes: ['id', 'nome'],
       include: [contatoInclude()],
       where: { ativo: true },
     });
 
-    return db.entities.participanteEstabelecimento.findOne({
+    return (db.models as any).ParticipanteEstabelecimento.findOne({
       where: {
         participanteId: nomination.participanteId,
       },

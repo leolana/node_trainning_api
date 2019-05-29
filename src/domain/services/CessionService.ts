@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
 
 import * as cessionService from './cessao';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import { SiscofWrapper } from '../../infra/siscof';
 import { Mailer } from '../../infra/mailer';
 import { Environment } from '../../infra/environment/Environment';

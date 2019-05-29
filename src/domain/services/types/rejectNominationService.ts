@@ -1,7 +1,7 @@
 import participanteIndicacaoStatus from '../../entities/participanteIndicacaoStatus';
 
 const rejectNominationService = db => (participanteId, motivoTipoRecusaId, motivo, usuario) => {
-  const find = id => db.entities.participanteIndicacao.findOne({
+  const find = id => (db.models as any).ParticipanteIndicacao.findOne({
     attributes: ['status'],
     where: {
       id,
@@ -16,7 +16,7 @@ const rejectNominationService = db => (participanteId, motivoTipoRecusaId, motiv
     }
   };
 
-  const reject = (id, reasonId, reason, user) => db.entities
+  const reject = (id, reasonId, reason, user) => (db.models as any)
     .participanteIndicacao.update(
     {
       status: participanteIndicacaoStatus.reprovado,

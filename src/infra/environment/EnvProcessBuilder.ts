@@ -10,10 +10,8 @@ import {
   AppEnv,
   LogEnv,
   DatabaseEnv,
-  SiscofEnv,
   AuthEnv,
   InternalApiEnv,
-  MovideskEnv,
   StorageEnv,
   ParamStoreEnv,
   MailerEnv,
@@ -32,10 +30,8 @@ export class EnvProcessBuilder {
   private appSettings: AppEnv;
   private logSettings: LogEnv;
   private dbSettings: DatabaseEnv;
-  private siscofSettings: SiscofEnv;
   private authSettings: AuthEnv;
   private internalApiSettings: InternalApiEnv;
-  private movideskSettings: MovideskEnv;
   private storageSettings: StorageEnv;
   private paramStoreSettings: ParamStoreEnv;
   private mailerSettings: MailerEnv;
@@ -89,21 +85,6 @@ export class EnvProcessBuilder {
     return this;
   }
 
-  addSiscofEnv = (): EnvProcessBuilder => {
-    const siscofProcessEnv = {
-      enableMock: toBool(getOsEnvOptional('ENABLE_MOCK_SISCOF')),
-      user: getOsEnv('ALPE_SISCOF_USER'),
-      password: getOsEnv('ALPE_SISCOF_PASSWORD'),
-      connectString: getOsEnv('ALPE_SISCOF_CONNECTSTRING'),
-    } as SiscofEnv;
-
-    const siscofEnv: SiscofEnv = Object.assign({}, this.configDefault.siscof, siscofProcessEnv);
-
-    this.siscofSettings = siscofEnv;
-
-    return this;
-  }
-
   addAuthEnv = (): EnvProcessBuilder => {
     const authProcessEnv = {
       enableMock: toBool(getOsEnvOptional('ENABLE_MOCK_AUTH')),
@@ -133,33 +114,11 @@ export class EnvProcessBuilder {
       enableMock: toBool(getOsEnvOptional('ENABLE_MOCK_INTERNALAPIS')),
       addressBancos: getOsEnv('ALPE_APIS_BANCOS_ADDRESS'),
       addressCEPs: getOsEnv('ALPE_APIS_CEPS_ADDRESS'),
-      financial: {
-        auth: Buffer.from(
-          `${getOsEnv('ALPE_APIS_FINANCIAL_LOGIN')}:${getOsEnv(
-            'ALPE_APIS_FINANCIAL_PWD'
-          )}`
-        ).toString('base64'),
-        address: getOsEnv('ALPE_APIS_FINANCIAL_ADDRESS'),
-      },
     } as InternalApiEnv;
 
     const internalApiEnv: InternalApiEnv = Object.assign({}, this.configDefault.internalApis, internalApiProcessEnv);
 
     this.internalApiSettings = internalApiEnv;
-
-    return this;
-  }
-
-  addMovideskEnv = (): EnvProcessBuilder => {
-    const movideskProcessEnv = {
-      enableMock: toBool(getOsEnvOptional('ENABLE_MOCK_MOVIDESK')),
-      address: getOsEnv('ALPE_APIS_MOVIDESK'),
-      token: getOsEnv('ALPE_MOVIDESK_TOKEN'),
-    } as MovideskEnv;
-
-    const movideskEnv: MovideskEnv = Object.assign({}, this.configDefault.movidesk, movideskProcessEnv);
-
-    this.movideskSettings = movideskEnv;
 
     return this;
   }
@@ -227,18 +186,14 @@ export class EnvProcessBuilder {
       app: this.appSettings,
       log: this.logSettings,
       db: this.dbSettings,
-      siscof: this.siscofSettings,
       auth: this.authSettings,
       internalApis: this.internalApiSettings,
-      movidesk: this.movideskSettings,
       storage: this.storageSettings,
       paramStore: this.paramStoreSettings,
       mailer: this.mailerSettings,
       sentry: this.sentrySettings,
     } as Environment;
 
-    const environment: Environment = Object.assign({}, this.configDefault, configEnvProcess);
-
-    return environment;
+    return Object.assign({}, this.configDefault, configEnvProcess);
   }
 }

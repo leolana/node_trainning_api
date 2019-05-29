@@ -4,10 +4,8 @@ import {
   Environment,
   LogEnv,
   DatabaseEnv,
-  SiscofEnv,
   AuthEnv,
   InternalApiEnv,
-  MovideskEnv,
   StorageEnv,
   MailerEnv,
   SentryEnv,
@@ -23,10 +21,8 @@ export class EnvParamStoreBuilder {
   private configParamStoreAppPath: string;
   private logSettings: LogEnv;
   private dbSettings: DatabaseEnv;
-  private siscofSettings: SiscofEnv;
   private authSettings: AuthEnv;
   private internalApiSettings: InternalApiEnv;
-  private movideskSettings: MovideskEnv;
   private storageSettings: StorageEnv;
   private mailerSettings: MailerEnv;
   private sentrySettings: SentryEnv;
@@ -47,7 +43,7 @@ export class EnvParamStoreBuilder {
       output,
     } as LogEnv;
 
-    const logEnv: LogEnv = Object.assign({}, this.configDefault.siscof, logParamEnv);
+    const logEnv: LogEnv = Object.assign({}, this.configDefault.log, logParamEnv);
 
     this.logSettings = logEnv;
     return this;
@@ -62,27 +58,9 @@ export class EnvParamStoreBuilder {
       logging,
     } as DatabaseEnv;
 
-    const dbEnv: DatabaseEnv = Object.assign({}, this.configDefault.siscof, dbParamEnv);
+    const dbEnv: DatabaseEnv = Object.assign({}, this.configDefault.db, dbParamEnv);
 
     this.dbSettings = dbEnv;
-    return this;
-  }
-
-  addSiscofEnv = (keyParams, valueParams: SSM.Types.ParameterList): EnvParamStoreBuilder => {
-    const user = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.user);
-    const password = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.password);
-    const connectString = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.connectString);
-
-    const siscofParamsEnv = {
-      user,
-      password,
-      connectString,
-    } as SiscofEnv;
-
-    const siscofEnv: SiscofEnv = Object.assign({}, this.configDefault.siscof, siscofParamsEnv);
-
-    this.siscofSettings = siscofEnv;
-
     return this;
   }
 
@@ -121,41 +99,15 @@ export class EnvParamStoreBuilder {
   addInternalApiEnv = (keyParams, valueParams: SSM.Types.ParameterList): EnvParamStoreBuilder => {
     const addressBancos = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.addressBancos);
     const addressCEPs = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.addressCEPs);
-    const financial = {
-      auth: Buffer.from(
-        `${getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.financial.login)}:${getOsEnv(
-          valueParams, this.configParamStoreAppPath,
-          keyParams.financial.password
-        )}`
-      ).toString('base64'),
-      address: getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.financial.address),
-    };
 
     const internalApiParamsEnv = {
       addressBancos,
       addressCEPs,
-      financial,
     } as InternalApiEnv;
 
     const internalApiEnv: InternalApiEnv = Object.assign({}, this.configDefault.internalApis, internalApiParamsEnv);
 
     this.internalApiSettings = internalApiEnv;
-
-    return this;
-  }
-
-  addMovideskEnv = (keyParams, valueParams: SSM.Types.ParameterList): EnvParamStoreBuilder => {
-    const address = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.address);
-    const token = getOsEnv(valueParams, this.configParamStoreAppPath, keyParams.token);
-
-    const movideskParamsEnv = {
-      address,
-      token,
-    } as MovideskEnv;
-
-    const movideskEnv: MovideskEnv = Object.assign({}, this.configDefault.movidesk, movideskParamsEnv);
-
-    this.movideskSettings = movideskEnv;
 
     return this;
   }
@@ -211,17 +163,13 @@ export class EnvParamStoreBuilder {
     const settingsParams = {
       log: this.logSettings,
       db: this.dbSettings,
-      siscof: this.siscofSettings,
       auth: this.authSettings,
       internalApis: this.internalApiSettings,
-      movidesk: this.movideskSettings,
       storage: this.storageSettings,
       mailer: this.mailerSettings,
       sentry: this.sentrySettings
     } as Environment;
 
-    const environment: Environment = Object.assign({}, this.configDefault, settingsParams);
-
-    return environment;
+    return Object.assign({}, this.configDefault, settingsParams);
   }
 }

@@ -6,7 +6,7 @@ export const getDatatableOptionsService = (query) => {
     sortOrder: query.sortOrder
   };
 
-  return datatablePaginator;
+  return (datatablePaginator);
 };
 
 export interface DatatableInterface {

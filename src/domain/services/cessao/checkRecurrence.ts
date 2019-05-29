@@ -26,7 +26,7 @@ const checkRecurrence = db => async (vinculo) => {
         return automatica && naoRecusada;
       });
     } else {
-      cessoes = await db.entities.cessao.findAll({
+      cessoes = await (db.models as any).Cessao.findAll({
         where: {
           participanteVinculoId: vinculo.id,
           tipo: cessaoTypeEnum.recorrenteAprovacaoAutomatica,

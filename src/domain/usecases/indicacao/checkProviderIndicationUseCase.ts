@@ -1,6 +1,6 @@
 const checkProviderIndicationUseCase = db => (estabelecimentoId, documento) => {
   function findIndicacao() {
-    return db.entities.participanteIndicacao.findOne({
+    return (db.models as any).ParticipanteIndicacao.findOne({
       attributes: ['nome'],
       where: {
         documento,
@@ -16,9 +16,9 @@ const checkProviderIndicationUseCase = db => (estabelecimentoId, documento) => {
   }
 
   function findFornecedor() {
-    return db.entities.participanteFornecedor.findOne({
+    return (db.models as any).ParticipanteFornecedor.findOne({
       include: [{
-        model: db.entities.participante,
+        model: (db.models as any).Participante,
         as: 'participante',
         attributes: ['id', 'nome', 'documento'],
         where: { documento },

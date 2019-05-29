@@ -2,7 +2,7 @@ import { injectable, inject } from 'inversify';
 
 import findById from './vinculo/findById';
 import findByParticipantsIds from './vinculo/findByParticipantsIds';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import { SiscofWrapper } from '../../infra/siscof';
 
 import types from '../../constants/types';

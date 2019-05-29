@@ -8,7 +8,7 @@ import * as chance from 'chance';
 
 import termoTipo from '../../domain/entities/termoTipo';
 import { rolesEnum } from '../../domain/services/auth/rolesEnum';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import Auth from './Auth';
 import { paramsEnum as accountParams } from '../../domain/services/account/paramsEnum';
 import { typeEnum as tiposParticipante } from '../../domain/services/participante/typeEnum';
@@ -21,7 +21,7 @@ import types from '../../constants/types';
 
 @injectable()
 class AuthDev implements Auth {
-  addRoleKc: (email: any, roles: any, pwd: any) => { };
+  addRoleKc: (email: any, roles: any, pwd: any) => {};
   generateToken(body: any) {
     throw new Exceptions.NotImplementedException();
   }
@@ -90,18 +90,7 @@ class AuthDev implements Auth {
   }
 
   isParticipante = (req: Request, ...tipos: tiposParticipante[]): boolean => {
-    const ehEstabelecimento = req.user.participanteEstabelecimento;
-    const ehFornecedor = req.user.participanteFornecedor;
-
-    return tipos.some((tipo) => {
-      if (tipo === tiposParticipante.estabelecimento && ehEstabelecimento) {
-        return true;
-      }
-      if (tipo === tiposParticipante.fornecedor && ehFornecedor) {
-        return true;
-      }
-      return false;
-    });
+    return true;
   }
 
   requireParticipante = (...tipos: tiposParticipante[]) => (req: Request, res: Response, next: NextFunction): any => {
@@ -112,18 +101,11 @@ class AuthDev implements Auth {
   }
 
   getUserRoles = (req: Request): rolesEnum[] => {
-    return req.user.resource_access[this.settings.clientId].roles;
+    return [];
   }
 
   hasPermission = (req: Request, ...accessRoles: rolesEnum[]): boolean => {
-    const userRoles = this.getUserRoles(req);
-
-    const isSuper = userRoles.includes(rolesEnum.super);
-    if (isSuper) {
-      return true;
-    }
-
-    return userRoles.some(r => accessRoles.includes(r));
+    return true;
   }
 
   changeUserRoles = (userId, rolesToRemove, rolesToAdd) => {
@@ -199,7 +181,7 @@ class AuthDev implements Auth {
         now.getDate(),
       );
 
-      this.db.entities.termo
+      (this.db.models as any).Termo
         .findOne({
           where: {
             inicio: { $lte: today },
@@ -215,7 +197,7 @@ class AuthDev implements Auth {
           },
           include: [
             {
-              model: this.db.entities.participanteAceiteTermo,
+              model: (this.db.models as any).ParticipanteAceiteTermo,
               as: 'aceites',
               where: {
                 participanteId: user.sessionPayload.participante,
@@ -292,10 +274,10 @@ class AuthDev implements Auth {
     const generateSessionTokenDev = (emailUsuario, participante, impersonating) => {
       let promise = impersonating
         ? Promise.resolve(participante)
-        : this.db.entities.usuario.findOne({
+        : (this.db.models as any).usuario.findOne({
           where: { email: emailUsuario },
           include: [{
-            model: this.db.entities.membro,
+            model: (this.db.models as any).Membro,
             as: 'associacoes',
             attributes: ['participanteId'],
           }],
@@ -312,14 +294,14 @@ class AuthDev implements Auth {
       promise = (promise as Promise<any>).then(participanteId => (!participanteId
         ? Promise.resolve({})
         : Promise.all([
-          this.db.entities.participante.findOne({
+          (this.db.models as any).Participante.findOne({
             where: { id: participanteId },
             attributes: ['nome'],
           }),
-          this.db.entities.participanteEstabelecimento.count({
+          (this.db.models as any).ParticipanteEstabelecimento.count({
             where: { participanteId },
           }),
-          this.db.entities.participanteFornecedor.count({
+          (this.db.models as any).ParticipanteFornecedor.count({
             where: { participanteId },
           }),
         ]).then(results => ({
@@ -339,7 +321,7 @@ class AuthDev implements Auth {
             now.getDate()
           );
 
-          return this.db.entities.termo.findOne({
+          return (this.db.models as any).Termo.findOne({
             where: {
               inicio: { $lte: today },
               fim: {
@@ -353,7 +335,7 @@ class AuthDev implements Auth {
                 : termoTipo.contratoMaeFornecedor,
             },
             include: [{
-              model: this.db.entities.participanteAceiteTermo,
+              model: (this.db.models as any).ParticipanteAceiteTermo,
               as: 'aceites',
               where: {
                 participanteId: result.participante,
@@ -386,10 +368,10 @@ class AuthDev implements Auth {
   }
 
   inviteUser = (convite, transaction) => {
-    const findUser = () => this.db.entities.usuario.findOne({
+    const findUser = () => (this.db.models as any).usuario.findOne({
       where: { email: convite.email },
       include: [{
-        model: this.db.entities.membro,
+        model: (this.db.models as any).Membro,
         as: 'associacoes',
       }],
     });
@@ -409,7 +391,7 @@ class AuthDev implements Auth {
         usuario.update(
           { roles: usuario.roles },
           { transaction }),
-        this.db.entities.membro.create(
+        (this.db.models as any).Membro.create(
           {
             usuarioId: usuario.id,
             participanteId: convite.participante,
@@ -430,7 +412,7 @@ class AuthDev implements Auth {
 
       convite.expiraEm = dataExpiracao;
 
-      return this.db.entities.usuarioConvite
+      return (this.db.models as any).usuarioConvite
         .create(convite, { transaction })
         .then(novoConvite => this.mailer.enviar(
           {
@@ -457,7 +439,7 @@ class AuthDev implements Auth {
   }
 
   getInfoUser = async (userId: string): Promise<KeycloakUserRepresentation> => {
-    return await this.db.entities.usuario.findByPk(userId);
+    return await (this.db.models as any).usuario.findByPk(userId);
   }
 
   putUser = async (user: KeycloakUserRepresentation): Promise<void> => {

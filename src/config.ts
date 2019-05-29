@@ -1,11 +1,9 @@
 import {
   Environment,
   AppEnv,
-  SiscofEnv,
   MonitorEnv,
   SwaggerEnv,
   HealthCheckEnv,
-  MovideskEnv,
   ParamStoreEnv
 } from './infra/environment/Environment';
 import * as pkg from '../package.json';
@@ -21,19 +19,6 @@ export const config: Environment = {
     banner: true,
     uri: 'http://localhost',
   } as AppEnv,
-  siscof: {
-    poolAlias: 'siscof',
-    _enableStats: false,
-    poolIncrement: 1,
-    poolMin: 0,
-    poolMax: 4,
-    poolPingInterval: 60,
-    poolTimeout: 60,
-    queueRequests: true,
-    queueTimeout: 60000,
-  } as SiscofEnv,
-  movidesk: {
-  } as MovideskEnv,
   paramStore: {
     enabled: false
   } as ParamStoreEnv,

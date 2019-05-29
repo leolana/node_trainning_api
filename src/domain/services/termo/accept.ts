@@ -1,10 +1,10 @@
 const accept = db => (id, participanteId, user) => {
   const get = () => {
-    const action = db.entities.termo.findOne({
+    const action = db.model.termo.findOne({
       where: { id },
       attributes: ['id'],
     });
-    return action;
+    return (action);
   };
 
   return get().then((termo) => {
@@ -12,7 +12,7 @@ const accept = db => (id, participanteId, user) => {
       throw new Error('termo-nao-encontrado');
     }
 
-    return db.entities.participanteAceiteTermo.create({
+    return (db.models as any).ParticipanteAceiteTermo.create({
       participanteId,
       termoId: termo.id,
       usuario: user,

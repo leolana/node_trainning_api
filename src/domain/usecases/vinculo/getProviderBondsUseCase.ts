@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import { BondNotFoundException } from '../../../interfaces/rest/exceptions/ApiExceptions';
 import participanteVinculoStatus from '../../entities/participanteVinculoStatus';
 import { DateTime } from 'luxon';
@@ -12,7 +12,7 @@ const getProviderBondsUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper) =>
   motivoTipoRecusaId?: number,
   observacao?: string) => {
 
-  const vinculo = await db.entities.participanteVinculo.findOne({
+  const vinculo = await (db.models as any).ParticipanteVinculo.findOne({
     where:
     {
       id,
@@ -45,7 +45,7 @@ const getProviderBondsUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper) =>
 
   await Promise.all([
     vinculo.save(),
-    db.entities.participanteVinculoHistorico.create({
+    (db.models as any).ParticipanteVinculoHistorico.create({
       participanteEstabelecimentoId: vinculo.participanteEstabelecimentoId,
       participanteFornecedorId: vinculo.participanteFornecedorId,
       status: vinculo.status,

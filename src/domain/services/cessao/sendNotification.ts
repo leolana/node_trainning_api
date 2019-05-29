@@ -1,20 +1,20 @@
 const sendNotification = (db, mailer, mailerSettings, logger) => (cession) => {
   const contatoInclude = () => ({
-    model: db.entities.participanteContato,
+    model: (db.models as any).ParticipanteContato,
     as: 'contatos',
     attributes: ['participanteId', 'email'],
     where: { ativo: true },
   });
 
   const participanteInclude = () => ({
-    model: db.entities.participante,
+    model: (db.models as any).Participante,
     as: 'participante',
     attributes: ['id', 'nome'],
     include: [contatoInclude()],
     where: { ativo: true },
   });
 
-  const findSupplier = supplierId => db.entities.participanteFornecedor
+  const findSupplier = supplierId => (db.models as any).ParticipanteFornecedor
     .findOne({
       where: { participanteId: supplierId },
       attributes: ['participanteId'],
@@ -22,7 +22,7 @@ const sendNotification = (db, mailer, mailerSettings, logger) => (cession) => {
     });
 
   const findEstablishment = establishmentId => (
-    db.entities.participanteEstabelecimento.findOne({
+    (db.models as any).ParticipanteEstabelecimento.findOne({
       where: { participanteId: establishmentId },
       attributes: ['participanteId'],
       include: [participanteInclude()],

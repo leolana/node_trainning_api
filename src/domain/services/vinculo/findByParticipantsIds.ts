@@ -6,7 +6,7 @@ const findByParticipantsIds = (db, siscofWrapper) => (
   include = [],
 ) => {
   function get() {
-    return db.entities.participanteVinculo.findOne({
+    return (db.models as any).ParticipanteVinculo.findOne({
       include,
       where: {
         participanteEstabelecimentoId: estabelecimentoId,

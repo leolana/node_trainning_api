@@ -9,7 +9,7 @@ import findById from '../../services/vinculo/findById';
 import * as Exceptions from '../../../interfaces/rest/exceptions/ApiExceptions';
 
 import { LoggerInterface } from '../../../infra/logging';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 import { SiscofWrapper } from '../../../infra/siscof';
 import { Mailer } from '../../../infra/mailer';
 
@@ -34,13 +34,13 @@ const requestCessionUseCase = (
 
     await resolveCession(true, cessaoRecorrent, termo.id, recorrencia, userData.email);
 
-    const getParticipante = (id: number) => db.entities.participante.findOne({
+    const getParticipante = (id: number) => (db.models as any).Participante.findOne({
       where: {
         id,
       },
       attributes: ['id', 'nome'],
       include: [{
-        model: db.entities.participanteContato,
+        model: (db.models as any).ParticipanteContato,
         as: 'contatos',
         attributes: ['id', 'email'],
         where: {
@@ -64,7 +64,7 @@ const requestCessionUseCase = (
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   const vinculo = await findLinks(linkId, [{
-    model: db.entities.participanteVinculoRecorrente,
+    model: (db.models as any).ParticipanteVinculoRecorrente,
     as: 'recorrentes',
     where: {
       status: [participanteVinculoStatus.pendente, participanteVinculoStatus.aprovado],
@@ -74,7 +74,7 @@ const requestCessionUseCase = (
     },
     required: false,
   }, {
-    model: db.entities.cessao,
+    model: (db.models as any).Cessao,
     as: 'cessoes',
     where: {
       tipo: cessaoTypeEnum.recorrenteAprovacaoAutomatica,
@@ -138,14 +138,14 @@ const requestCessionUseCase = (
     cessao.status = cessaoStatusEnum.falha;
   }
 
-  const cessaoCriada = await db.entities.cessao.create(cessao);
+  const cessaoCriada = await (db.models as any).Cessao.create(cessao);
   const cessaoSalva = Object.assign(cessaoCriada, cessao);
 
   const historico = Object.assign({}, cessaoSalva.dataValues);
   historico.cessaoId = historico.id;
   delete historico.id;
 
-  await db.entities.cessaoHistorico.create(historico);
+  await (db.models as any).CessaoHistorico.create(historico);
   if (cessaoSalva.status === cessaoStatusEnum.falha) {
     throw new Error(cessaoSalva.mensagemRetornoSiscof);
   }
@@ -156,8 +156,8 @@ const requestCessionUseCase = (
     });
 
     await Promise.all([
-      db.entities.cessaoRecebivel.bulkCreate(cessaoSalva.recebiveis),
-      db.entities.cessaoRecebivelHistorico.bulkCreate(
+      (db.models as any).CessaoRecebivel.bulkCreate(cessaoSalva.recebiveis),
+      (db.models as any).CessaoRecebivelHistorico.bulkCreate(
         cessaoSalva.recebiveis
       ),
     ]);

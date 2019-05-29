@@ -2,7 +2,7 @@
 import 'reflect-metadata';
 
 import { injectable, inject } from 'inversify';
-import { Sequelize } from 'sequelize-database';
+import { Sequelize } from 'sequelize-typescript';
 
 import types from './constants/types';
 import Server from './infra/api/Server';
