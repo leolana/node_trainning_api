@@ -44,10 +44,10 @@ module.exports = {
         : 2;
     });
 
-    return queryInterface.bulkInsert('participanteIndicacao', indicacoes, {});
+    await queryInterface.bulkInsert('participanteIndicacao', indicacoes, {});
   },
 
   down: async (queryInterface: QueryInterface) => {
-    return queryInterface.bulkDelete('participanteIndicacao', null, {});
+    await queryInterface.bulkDelete('participanteIndicacao', null, {});
   }
 };

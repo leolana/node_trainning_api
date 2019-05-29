@@ -12,9 +12,9 @@ module.exports = {
       { nome: 'Hipercard', ...timestamp },
     ];
 
-    return queryInterface.bulkInsert('bandeira', bandeiras, {});
+    await queryInterface.bulkInsert('bandeira', bandeiras, {});
   },
   down: async (queryInterface: QueryInterface) => {
-    return queryInterface.bulkDelete('bandeira', null, {});
+    await queryInterface.bulkDelete('bandeira', null, {});
   },
 };

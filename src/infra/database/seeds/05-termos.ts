@@ -45,10 +45,10 @@ module.exports = {
       }
     ];
 
-    return queryInterface.bulkInsert('termo', termos, {});
+    await queryInterface.bulkInsert('termo', termos, {});
   },
 
   down: async (queryInterface: QueryInterface) => {
-    return queryInterface.bulkDelete('termo', null, {});
+    await queryInterface.bulkDelete('termo', null, {});
   }
 };

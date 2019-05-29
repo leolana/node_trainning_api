@@ -31,7 +31,7 @@ module.exports = {
         participanteId: 1,
         cessaoLancamentoStatusId: 1,
         valor: 10.0,
-        data:  now,
+        data:  now.toSQL(),
         chaveDestino: null,
         ...timestamp
       },
@@ -41,18 +41,18 @@ module.exports = {
         participanteId: 2,
         cessaoLancamentoStatusId: 1,
         valor: 5.0,
-        data:  now,
+        data:  now.toSQL(),
         chaveDestino: null,
         ...timestamp
       }
     ];
 
-    return queryInterface.bulkInsert('cessaoLancamento', cessaoLancamento, {});
+    await queryInterface.bulkInsert('cessaoLancamento', cessaoLancamento, {});
   },
 
   down: async (queryInterface: QueryInterface) => {
     await queryInterface.bulkDelete('cessaoLancamento', null, {});
-    return Promise.all([
+    await Promise.all([
       queryInterface.bulkDelete('cessaoLancamentoStatus', null, {}),
       queryInterface.bulkDelete('cessaoLancamentoTipo', null, {}),
     ]);

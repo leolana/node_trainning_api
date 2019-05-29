@@ -10,9 +10,9 @@ module.exports = {
       { nome: 'Rede', ...timestamp },
     ];
 
-    return queryInterface.bulkInsert('adquirente', adquirentes, {});
+    await queryInterface.bulkInsert('adquirente', adquirentes, {});
   },
   down: async (queryInterface: QueryInterface) => {
-    return queryInterface.bulkDelete('adquirente', null, {});
+    await queryInterface.bulkDelete('adquirente', null, {});
   },
 };

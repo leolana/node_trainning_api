@@ -11,10 +11,10 @@ module.exports = {
       { id: 3, nome: 'Crédito Parcelado', ...timestamp },
     ];
 
-    return queryInterface.bulkInsert('produto', produtos, {});
+    await queryInterface.bulkInsert('produto', produtos, {});
   },
 
   down: async (queryInterface: QueryInterface) => {
-    return queryInterface.bulkDelete('produto', null, {});
+    await queryInterface.bulkDelete('produto', null, {});
   }
 };

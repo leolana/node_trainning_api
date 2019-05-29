@@ -97,8 +97,8 @@ container
   });
 
 container.bind<SiscofCmd>(types.SiscofCmd).to(SiscofCmd);
-container.bind<SiscofDb>(types.SiscofDb).toDynamicValue((context: interfaces.Context) => {
-  const siscofDbBootstrapper = new SiscofDbBootstrapper(context);
+container.bind<SiscofDb>(types.SiscofDb).toDynamicValue(() => {
+  const siscofDbBootstrapper = new SiscofDbBootstrapper();
   return siscofDbBootstrapper.create();
 }).inSingletonScope();
 

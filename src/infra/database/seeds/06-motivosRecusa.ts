@@ -131,11 +131,11 @@ module.exports = {
       ,
       []);
 
-    return queryInterface.bulkInsert('motivoTipoRecusa', data, {});
+    await queryInterface.bulkInsert('motivoTipoRecusa', data, {});
   },
 
   down: async (queryInterface: QueryInterface) => {
     await queryInterface.bulkDelete('motivoTipoRecusa', null, {});
-    return queryInterface.bulkDelete('motivoRecusa', null, {});
+    await queryInterface.bulkDelete('motivoRecusa', null, {});
   }
 };

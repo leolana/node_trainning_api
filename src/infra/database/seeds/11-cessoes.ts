@@ -53,7 +53,7 @@ module.exports = {
         ...timestamp
       },
       {
-        participanteVinculoId: 2,
+        participanteVinculoId: 1,
         solicitante: 'Charles Stone',
         usuario: defaultUser,
         cessaoStatusId: statusCreated[0].id,
@@ -70,46 +70,45 @@ module.exports = {
     ];
 
     const recebiveis = [
-      [ // Cessão 1
-        {
-          cessaoId: 1,
-          transacaoId: 1,
-          cancelado: false,
-          ...timestamp
-        },
-        {
-          cessaoId: 1,
-          transacaoId: 1,
-          cancelado: false,
-          ...timestamp
-        },
-        {
-          cessaoId: 1,
-          transacaoId: 1,
-          cancelado: false,
-          ...timestamp
-        },
-      ],
-      [ // Cessão 2
-        {
-          cessaoId: 2,
-          transacaoId: 2,
-          cancelado: false,
-          ...timestamp
-        },
-        {
-          cessaoId: 2,
-          transacaoId: 2,
-          cancelado: false,
-          ...timestamp
-        },
-        {
-          cessaoId: 2,
-          transacaoId: 2,
-          cancelado: false,
-          ...timestamp
-        },
-      ],
+      // Cessão 1
+      {
+        cessaoId: 1,
+        transacaoId: 1,
+        cancelado: false,
+        ...timestamp
+      },
+      {
+        cessaoId: 1,
+        transacaoId: 1,
+        cancelado: false,
+        ...timestamp
+      },
+      {
+        cessaoId: 1,
+        transacaoId: 1,
+        cancelado: false,
+        ...timestamp
+      },
+
+      // Cessão 2
+      {
+        cessaoId: 2,
+        transacaoId: 2,
+        cancelado: false,
+        ...timestamp
+      },
+      {
+        cessaoId: 2,
+        transacaoId: 2,
+        cancelado: false,
+        ...timestamp
+      },
+      {
+        cessaoId: 2,
+        transacaoId: 2,
+        cancelado: false,
+        ...timestamp
+      },
     ];
 
     await queryInterface.bulkInsert('cessao', cessoes, {});
@@ -121,12 +120,11 @@ module.exports = {
     await Promise.all([
       queryInterface.bulkDelete('cessaoAceite', null, {}),
       queryInterface.bulkDelete('cessaoHistorico', null, {}),
-      queryInterface.bulkDelete('cessaoRecebivelHistorico', null, {})
     ]);
     await queryInterface.bulkDelete('cessaoRecebivel', null, {});
     await queryInterface.bulkDelete('cessaoParametro', null, {});
     await queryInterface.bulkDelete('cessao', null, {});
-    return Promise.all([
+    await Promise.all([
       queryInterface.bulkDelete('cessaoStatus', null, {}),
       queryInterface.bulkDelete('cessaoTipo', null, {}),
       queryInterface.bulkDelete('cessaoTipoParametro', null, {}),

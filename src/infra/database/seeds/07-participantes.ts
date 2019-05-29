@@ -22,6 +22,7 @@ module.exports = {
       documento: '32608796000156',
       nome: 'KG Menswear - Fornecedor',
       ativo: true,
+      ...timestamp
     };
 
     await queryInterface.bulkInsert('participante', [participantesEstabelecimento]);
@@ -34,10 +35,11 @@ module.exports = {
         taxa: 1.8,
         participanteId: 2,
         usuarioCriacao: 'admin',
-        participanteTaxaTipo: rateTypeEnum.cessao
+        participanteTaxaTipo: rateTypeEnum.cessao,
+        ...timestamp
       }
     ];
-    await queryInterface.bulkInsert('participanteTaxa', [taxa]);
+    await queryInterface.bulkInsert('participanteTaxa', taxa);
 
   },
 

@@ -33,7 +33,7 @@ export class Transacao extends Model<Transacao> {
 
   @AllowNull(false)
   @Column(DataType.SMALLINT)
-  numeroParcelas: number;
+  numeroParcela: number;
 
   @AllowNull(false)
   @Column(DataType.SMALLINT)

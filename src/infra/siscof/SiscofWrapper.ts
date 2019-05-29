@@ -5,10 +5,10 @@ import SiscofConnector from './SiscofConnector';
 import SiscofFormatter from './SiscofFormatter';
 import tiposPessoa from '../../domain/entities/tiposPessoa';
 import participanteVinculoStatus from '../../domain/entities/participanteVinculoStatus';
-import rateTypeEnum from '../../domain/services/participante/rateTypeEnum';
 
 import types from '../../constants/types';
 import { PreconditionFailedError } from '../../interfaces/rest/errors/ApiErrors';
+import rateTypeEnum from '../../domain/services/types/rateTypeEnum';
 
 @injectable()
 class SiscofWrapper {

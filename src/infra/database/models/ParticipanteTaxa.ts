@@ -16,7 +16,7 @@ export class ParticipanteTaxa extends Model<ParticipanteTaxa>{
 
   @AllowNull(true)
   @Column(DataType.DECIMAL)
-  valorFIm: number;
+  valorFim: number;
 
   @AllowNull(false)
   @Column(DataType.FLOAT)

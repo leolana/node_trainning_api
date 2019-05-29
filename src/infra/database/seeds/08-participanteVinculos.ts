@@ -26,7 +26,7 @@ module.exports = {
       ...timestamp
     };
 
-    return queryInterface.bulkInsert('participanteVinculo', [vinculos], {});
+    await queryInterface.bulkInsert('participanteVinculo', [vinculos], {});
   },
 
   down: async (queryInterface: QueryInterface) => {
@@ -34,6 +34,6 @@ module.exports = {
       queryInterface.bulkDelete('participanteVinculoRecorrente', null, {}),
       queryInterface.bulkDelete('participanteVinculoHistorico', null, {}),
     ]);
-    return queryInterface.bulkDelete('participanteVinculo', null, {});
+    await queryInterface.bulkDelete('participanteVinculo', null, {});
   }
 };

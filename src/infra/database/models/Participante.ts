@@ -26,8 +26,8 @@ export class Participante extends Model<Participante> {
   nome: string;
 
   @AllowNull(false)
-  @Column(DataType.BOOLEAN)
   @Default(true)
+  @Column(DataType.BOOLEAN)
   ativo: boolean;
 
   @HasMany(() => ParticipanteIndicacao, 'participanteId')
