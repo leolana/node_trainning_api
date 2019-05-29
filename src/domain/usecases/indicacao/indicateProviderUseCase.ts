@@ -29,14 +29,14 @@ const indicateProviderUseCase = (
 
     const statusPendente = participanteVinculoStatus.pendente;
 
-    const participantes = await (db.models as any).participante.findAll({
+    const participantes = await (db.models as any).Participante.findAll({
       where: {
         id: estabelecimentoComercialId,
         ativo: true,
       },
       attributes: ['id', 'nome', 'razaoSocial'],
       include: [{
-        model: (db.models as any).participanteIndicacao,
+        model: (db.models as any).ParticipanteIndicacao,
         as: 'indicacoes',
         attributes: ['id', 'documento'],
       }],
@@ -53,7 +53,7 @@ const indicateProviderUseCase = (
       throw new Exceptions.AlreadyNominatedProviderException();
     }
 
-    await (db.models as any).participanteIndicacao.create({
+    await (db.models as any).ParticipanteIndicacao.create({
       documento,
       nome,
       email,

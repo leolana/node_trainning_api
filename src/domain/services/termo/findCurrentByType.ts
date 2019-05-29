@@ -17,7 +17,7 @@ const findCurrentByType = db => (tipo) => {
     tipo,
   };
 
-  return (db.models as any).termo.findOne({
+  return (db.models as any).Termo.findOne({
     where: filtro,
     attributes: ['id', 'titulo', 'texto', 'tipo'],
   });

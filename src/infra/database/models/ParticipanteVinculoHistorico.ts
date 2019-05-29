@@ -11,6 +11,10 @@ import * as Exceptions from '../../../interfaces/rest/exceptions/ApiExceptions';
 export class ParticipanteVinculoHistorico extends Model<ParticipanteVinculoHistorico> {
   @AllowNull(false)
   @Column(DataType.INTEGER)
+  participanteVinculoId: number;
+
+  @AllowNull(false)
+  @Column(DataType.INTEGER)
   participanteEstabelecimentoId: number;
 
   @AllowNull(false)

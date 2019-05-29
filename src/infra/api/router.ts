@@ -11,7 +11,7 @@ import * as cookieParser from 'cookie-parser';
 import * as expressJWT from 'express-jwt';
 
 import errorHandler from './logging/errorHandler';
-import autho from '../../interfaces/rest/middlewares/autho';
+// import autho from '../../interfaces/rest/middlewares/autho';
 import ControllerLoader from './ControllerLoader';
 import { unless } from '../../interfaces/rest/middlewares/unlessRoutes';
 import { Environment } from '../environment/Environment';
@@ -39,7 +39,7 @@ const router = () => {
     .use(morgan('tiny')) // add: nas variaveis de ambiente
     .use(flash())
     .use(expressJWT(params).unless(unless))
-    .use(autho)
+    // .use(autho)
     .use('/', ControllerLoader.load())
     .use(errorHandler);
     // .use('/swagger', swaggerMiddleware);

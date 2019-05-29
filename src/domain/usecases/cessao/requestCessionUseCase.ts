@@ -34,13 +34,13 @@ const requestCessionUseCase = (
 
     await resolveCession(true, cessaoRecorrent, termo.id, recorrencia, userData.email);
 
-    const getParticipante = (id: number) => (db.models as any).participante.findOne({
+    const getParticipante = (id: number) => (db.models as any).Participante.findOne({
       where: {
         id,
       },
       attributes: ['id', 'nome'],
       include: [{
-        model: (db.models as any).participanteContato,
+        model: (db.models as any).ParticipanteContato,
         as: 'contatos',
         attributes: ['id', 'email'],
         where: {
@@ -64,7 +64,7 @@ const requestCessionUseCase = (
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   const vinculo = await findLinks(linkId, [{
-    model: (db.models as any).participanteVinculoRecorrente,
+    model: (db.models as any).ParticipanteVinculoRecorrente,
     as: 'recorrentes',
     where: {
       status: [participanteVinculoStatus.pendente, participanteVinculoStatus.aprovado],
@@ -74,7 +74,7 @@ const requestCessionUseCase = (
     },
     required: false,
   }, {
-    model: (db.models as any).cessao,
+    model: (db.models as any).Cessao,
     as: 'cessoes',
     where: {
       tipo: cessaoTypeEnum.recorrenteAprovacaoAutomatica,
@@ -138,14 +138,14 @@ const requestCessionUseCase = (
     cessao.status = cessaoStatusEnum.falha;
   }
 
-  const cessaoCriada = await (db.models as any).cessao.create(cessao);
+  const cessaoCriada = await (db.models as any).Cessao.create(cessao);
   const cessaoSalva = Object.assign(cessaoCriada, cessao);
 
   const historico = Object.assign({}, cessaoSalva.dataValues);
   historico.cessaoId = historico.id;
   delete historico.id;
 
-  await (db.models as any).cessaoHistorico.create(historico);
+  await (db.models as any).CessaoHistorico.create(historico);
   if (cessaoSalva.status === cessaoStatusEnum.falha) {
     throw new Error(cessaoSalva.mensagemRetornoSiscof);
   }
@@ -156,8 +156,8 @@ const requestCessionUseCase = (
     });
 
     await Promise.all([
-      (db.models as any).cessaoRecebivel.bulkCreate(cessaoSalva.recebiveis),
-      (db.models as any).cessaoRecebivelHistorico.bulkCreate(
+      (db.models as any).CessaoRecebivel.bulkCreate(cessaoSalva.recebiveis),
+      (db.models as any).CessaoRecebivelHistorico.bulkCreate(
         cessaoSalva.recebiveis
       ),
     ]);

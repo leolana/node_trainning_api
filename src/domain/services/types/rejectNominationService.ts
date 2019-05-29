@@ -1,7 +1,7 @@
 import participanteIndicacaoStatus from '../../entities/participanteIndicacaoStatus';
 
 const rejectNominationService = db => (participanteId, motivoTipoRecusaId, motivo, usuario) => {
-  const find = id => (db.models as any).participanteIndicacao.findOne({
+  const find = id => (db.models as any).ParticipanteIndicacao.findOne({
     attributes: ['status'],
     where: {
       id,

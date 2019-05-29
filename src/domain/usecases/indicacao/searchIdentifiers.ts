@@ -1,5 +1,5 @@
 const searchIdentifiers = db => (supplierDocument, establishmentDocument) => {
-  const findSupplier = document => (db.models as any).participante
+  const findSupplier = document => (db.models as any).Participante
     .findOne({
       where: {
         documento: document,
@@ -12,7 +12,7 @@ const searchIdentifiers = db => (supplierDocument, establishmentDocument) => {
       return supplier;
     });
 
-  const findEstablishment = document => (db.models as any).participante
+  const findEstablishment = document => (db.models as any).Participante
     .findOne({
       where: {
         documento: document,
@@ -26,7 +26,7 @@ const searchIdentifiers = db => (supplierDocument, establishmentDocument) => {
 
   const findLink = (
     supplierId, establishmentId
-  ) => (db.models as any).participanteVinculo
+  ) => (db.models as any).ParticipanteVinculo
     .findOne({
       where: {
         participanteEstabelecimentoId: establishmentId,

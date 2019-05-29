@@ -1,8 +1,9 @@
 // tslint:disable: no-magic-numbers
-import { Table, AllowNull, Column, DataType, Model, BelongsTo } from 'sequelize-typescript';
+import { Table, AllowNull, Column, DataType, Model, BelongsTo, Default } from 'sequelize-typescript';
 import { Cessao } from './Cessao';
 import { CessaoLancamentoStatus } from './CessaoLancamentoStatus';
 import { CessaoLancamentoTipo } from './CessaoLancamentoTipo';
+import { Participante } from '..';
 
 @Table({
   timestamps: true,
@@ -23,14 +24,15 @@ export class CessaoLancamento extends Model<CessaoLancamento>{
   participanteId: number;
 
   @AllowNull(false)
-  @Column(DataType.INTEGER)
+  @Default(1)
+  @Column(DataType.SMALLINT)
   cessaoLancamentoStatusId: number;
 
   @AllowNull(false)
   @Column(DataType.DECIMAL)
   valor: number;
 
-  @AllowNull(true)
+  @AllowNull(false)
   @Column(DataType.DATEONLY)
   data: Date;
 
@@ -51,4 +53,6 @@ export class CessaoLancamento extends Model<CessaoLancamento>{
   @BelongsTo(() => Cessao, 'cessaoId')
   cessoes: Cessao[];
 
+  @BelongsTo(() => Participante, 'participanteId')
+  participantes: Participante[];
 }

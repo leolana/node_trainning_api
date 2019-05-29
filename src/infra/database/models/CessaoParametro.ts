@@ -1,5 +1,5 @@
 // tslint:disable: no-magic-numbers
-import { Table, AllowNull, Column, DataType, Model, Default, HasMany } from 'sequelize-typescript';
+import { Table, AllowNull, Column, DataType, Model,  HasMany } from 'sequelize-typescript';
 import { CessaoTipoParametro } from './CessaoTipoParametro';
 
 @Table({
@@ -17,7 +17,6 @@ export class CessaoParametro extends Model<CessaoParametro>{
   descricao: string;
 
   @AllowNull(true)
-  @Default(true)
   @Column(DataType.STRING(100))
   valorPadrao: string;
 

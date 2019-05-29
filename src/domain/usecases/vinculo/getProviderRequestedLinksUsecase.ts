@@ -41,7 +41,7 @@ const getProviderRequestedLinksUsecase = db => (
         .toSQLDate();
     }
 
-    return (db.models as any).participanteVinculo
+    return (db.models as any).ParticipanteVinculo
       .findAll({
         attributes: [
           'id',
@@ -49,18 +49,18 @@ const getProviderRequestedLinksUsecase = db => (
         ],
         where: linkFilter,
         include: [{
-          model: (db.models as any).participanteEstabelecimento,
+          model: (db.models as any).ParticipanteEstabelecimento,
           as: 'estabelecimento',
           attributes: ['participanteId'],
           required: true,
           include: [{
-            model: (db.models as any).participante,
+            model: (db.models as any).Participante,
             as: 'participante',
             attributes: ['id', 'documento', 'tipoPessoa', 'nome', 'telefone'],
             where: filter,
             required: true,
             include: [{
-              model: (db.models as any).participanteContato,
+              model: (db.models as any).ParticipanteContato,
               as: 'contatos',
               where: {
                 ativo: true,
@@ -76,7 +76,7 @@ const getProviderRequestedLinksUsecase = db => (
     if (documents) {
       filter.documento = { $in: documents };
     }
-    return (db.models as any).participanteIndicacao
+    return (db.models as any).ParticipanteIndicacao
       .findAll({
         filter,
         attributes: [

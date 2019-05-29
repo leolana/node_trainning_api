@@ -12,7 +12,7 @@ const getProviderBondsUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper) =>
   motivoTipoRecusaId?: number,
   observacao?: string) => {
 
-  const vinculo = await (db.models as any).participanteVinculo.findOne({
+  const vinculo = await (db.models as any).ParticipanteVinculo.findOne({
     where:
     {
       id,
@@ -45,7 +45,7 @@ const getProviderBondsUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper) =>
 
   await Promise.all([
     vinculo.save(),
-    (db.models as any).participanteVinculoHistorico.create({
+    (db.models as any).ParticipanteVinculoHistorico.create({
       participanteEstabelecimentoId: vinculo.participanteEstabelecimentoId,
       participanteFornecedorId: vinculo.participanteFornecedorId,
       status: vinculo.status,

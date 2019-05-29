@@ -28,14 +28,14 @@ const linkUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper, mailer: Mailer
   }
 
   const contatoInclude = {
-    model: (db.models as any).participanteContato,
+    model: (db.models as any).ParticipanteContato,
     as: 'contatos',
     attributes: ['participanteId', 'email'],
     where: { ativo: true },
   };
 
   const participanteInclude = {
-    model: (db.models as any).participante,
+    model: (db.models as any).Participante,
     as: 'participante',
     attributes: ['id', 'nome'],
     include: [contatoInclude],
@@ -43,7 +43,7 @@ const linkUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper, mailer: Mailer
   };
 
   const vinculoInclude = {
-    model: (db.models as any).participanteVinculo,
+    model: (db.models as any).ParticipanteVinculo,
     as: 'vinculos',
     attributes: [
       'id',
@@ -57,7 +57,7 @@ const linkUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper, mailer: Mailer
     participanteFornecedorId,
     estabelecimentoSolicitouVinculo,
     statusVinculo
-  ) => (db.models as any).participanteVinculo.create({
+  ) => (db.models as any).ParticipanteVinculo.create({
     participanteEstabelecimentoId,
     participanteFornecedorId,
     estabelecimentoSolicitouVinculo,
@@ -69,12 +69,12 @@ const linkUseCase = (db: Sequelize, siscofWrapper: SiscofWrapper, mailer: Mailer
   });
 
   const [fornecedor, estabelecimento] = await Promise.all([
-    (db.models as any).participanteFornecedor.findOne({
+    (db.models as any).ParticipanteFornecedor.findOne({
       where: { participanteId: fornId },
       attributes: ['participanteId'],
       include: [participanteInclude, vinculoInclude],
     }),
-    (db.models as any).participanteEstabelecimento.findOne({
+    (db.models as any).ParticipanteEstabelecimento.findOne({
       where: { participanteId: estabelecimentoComercialId },
       attributes: ['participanteId'],
       include: [participanteInclude, vinculoInclude],

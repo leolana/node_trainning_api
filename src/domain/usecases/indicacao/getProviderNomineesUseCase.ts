@@ -1,26 +1,22 @@
 import { ParticipanteNotFoundException } from '../../../interfaces/rest/exceptions/ApiExceptions';
+import { Sequelize } from 'sequelize-typescript';
 
-const getProviderNomineesUseCase = db => async (idEstabelecimento) => {
+const getProviderNomineesUseCase = (db: Sequelize) => async (idEstabelecimento) => {
   const data: any = {};
-  const participanteEstabelecimento = await (db.models as any).participanteEstabelecimento
+  const participanteEstabelecimento = await (db.models as any).Participante
     .findOne({
-      attributes: ['participanteId'],
-      include: [{
-        as: 'participante',
-        model: (db.models as any).participante,
-        attributes: ['id', 'documento', 'ativo'],
-      }],
+      attributes: ['id', 'documento', 'ativo'],
     });
 
   if (!participanteEstabelecimento) throw new ParticipanteNotFoundException();
-  data.participante = participanteEstabelecimento.participante;
+  data.participante = participanteEstabelecimento;
 
-  const participanteIndicacao = await (db.models as any).participanteIndicacao.findAll({
+  const participanteIndicacao = await (db.models as any).ParticipanteIndicacao.findAll({
     where: { participanteId: idEstabelecimento },
     include: [{
-      model: (db.models as any).motivoTipoRecusa,
+      model: (db.models as any).MotivoTipoRecusa,
       include: [{
-        model: (db.models as any).motivoRecusa,
+        model: (db.models as any).MotivoRecusa,
         as: 'motivoRecusa',
         attributes: ['id', 'descricao', 'requerObservacao'],
         where: { ativo: true },

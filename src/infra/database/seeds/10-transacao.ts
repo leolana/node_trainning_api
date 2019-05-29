@@ -8,14 +8,7 @@ module.exports = {
     const timestamp = { createdAt: now.toSQL(), updatedAt: now.toSQL() };
     const defaultDataVenda = now.set({ month: 1, day: 1 }).toSQL();
     const defaultDataPagar = now.set({ month: 3, day: 1 }).toSQL();
-
-    const vinculos = await queryInterface.sequelize.query(
-      'SELECT id FROM "participante";',
-      { type: QueryTypes.SELECT }
-    );
-
-    console.log('-----------------', vinculos);
-
+    
     const transacoes = [
       {
         dataVenda: defaultDataVenda,

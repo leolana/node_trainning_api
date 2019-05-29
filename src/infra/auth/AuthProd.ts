@@ -117,7 +117,7 @@ class AuthProd implements Auth {
       : (this.db.models as any).usuario.findOne({
         where: { email: emailUsuario },
         include: [{
-          model: (this.db.models as any).membro,
+          model: (this.db.models as any).Membro,
           as: 'associacoes',
           attributes: ['participanteId'],
         }],
@@ -134,14 +134,14 @@ class AuthProd implements Auth {
     promise = promise.then(participanteId => (!participanteId
       ? Promise.resolve({})
       : Promise.all([
-        (this.db.models as any).participante.findOne({
+        (this.db.models as any).Participante.findOne({
           where: { id: participanteId },
           attributes: ['nome'],
         }),
-        (this.db.models as any).participanteEstabelecimento.count({
+        (this.db.models as any).ParticipanteEstabelecimento.count({
           where: { participanteId },
         }),
-        (this.db.models as any).participanteFornecedor.count({
+        (this.db.models as any).ParticipanteFornecedor.count({
           where: { participanteId },
         }),
       ]).then(results => ({
@@ -161,7 +161,7 @@ class AuthProd implements Auth {
           now.getDate()
         );
 
-        return (this.db.models as any).termo.findOne({
+        return (this.db.models as any).Termo.findOne({
           where: {
             inicio: { $lte: today },
             fim: {
@@ -175,7 +175,7 @@ class AuthProd implements Auth {
               : termoTipo.contratoMaeFornecedor,
           },
           include: [{
-            model: (this.db.models as any).participanteAceiteTermo,
+            model: (this.db.models as any).ParticipanteAceiteTermo,
             as: 'aceites',
             where: {
               participanteId: result.participante,
@@ -284,7 +284,7 @@ class AuthProd implements Auth {
     const findUser = () => (this.db.models as any).usuario.findOne({
       where: { email: convite.email },
       include: [{
-        model: (this.db.models as any).membro,
+        model: (this.db.models as any).Membro,
         as: 'associacoes',
       }],
     });
@@ -304,7 +304,7 @@ class AuthProd implements Auth {
         usuario.update(
           { roles: usuario.roles },
           { transaction }),
-        (this.db.models as any).membro.create(
+        (this.db.models as any).Membro.create(
           {
             usuarioId: usuario.id,
             participanteId: convite.participante,
@@ -350,7 +350,7 @@ class AuthProd implements Auth {
     const usuario = await (this.db.models as any).usuario.findOne({
       where: { email },
       include: [{
-        model: (this.db.models as any).membro,
+        model: (this.db.models as any).Membro,
         as: 'associacoes',
       }],
     });

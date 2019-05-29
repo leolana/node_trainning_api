@@ -1,8 +1,8 @@
 
 // tslint:disable:no-magic-numbers
-import { Table, Model, Column, DataType, AllowNull, BelongsTo, ForeignKey } from 'sequelize-typescript';
+import { Table, Model, Column, DataType, AllowNull, BelongsTo, ForeignKey, HasMany } from 'sequelize-typescript';
 import { Adquirente } from './Adquirente';
-import { Bandeira, Participante } from '..';
+import { Bandeira, Participante, CessaoRecebivel } from '..';
 import { Produto } from './Produto';
 import { TipoAgenda } from './TipoAgenda';
 @Table({
@@ -81,9 +81,15 @@ export class Transacao extends Model<Transacao> {
   @BelongsTo(() => Participante, 'participanteId')
   participantes: Participante[];
 
+  @BelongsTo(() => Participante, 'participanteOriginal')
+  participantesOriginal: Participante[];
+
   @BelongsTo(() => Produto, 'produtoId')
   produtos: Produto[];
 
   @BelongsTo(() => TipoAgenda, 'tipoAgendaId')
   tipoAgenda: TipoAgenda[];
+
+  @HasMany(() => CessaoRecebivel, 'transacaoId')
+  recebiveis: CessaoRecebivel[];
 }

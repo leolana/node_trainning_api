@@ -1,11 +1,12 @@
 
 // tslint:disable:no-magic-numbers
-import { Table, Model, Column, DataType, AllowNull, Default, Is, HasMany, BelongsTo } from 'sequelize-typescript';
+import { Table, Model, Column, DataType, AllowNull, Default, Is, HasMany, BelongsTo, ForeignKey } from 'sequelize-typescript';
 import participanteVinculoStatus from '../../../domain/entities/participanteVinculoStatus';
 import * as Exceptions from '../../../interfaces/rest/exceptions/ApiExceptions';
 import { Cessao } from './Cessao';
 import { MotivoTipoRecusa } from './MotivoTipoRecusa';
 import { ParticipanteVinculoRecorrente } from './ParticipanteVinculoRecorrente';
+import { Participante } from '..';
 @Table({
   timestamps: true,
   tableName: 'participanteVinculo'
@@ -13,10 +14,12 @@ import { ParticipanteVinculoRecorrente } from './ParticipanteVinculoRecorrente';
 
 export class ParticipanteVinculo extends Model<ParticipanteVinculo> {
   @AllowNull(false)
+  @ForeignKey(() => Participante)
   @Column(DataType.INTEGER)
   participanteEstabelecimentoId: number;
 
   @AllowNull(false)
+  @ForeignKey(() => Participante)
   @Column(DataType.INTEGER)
   participanteFornecedorId: number;
 

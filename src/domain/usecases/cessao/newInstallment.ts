@@ -96,7 +96,7 @@ const newInstallment = (db, siscofWrapper, mailer, emailTemplates, mailerConfig)
   };
 
   const salvarCessao = (cessao) => {
-    const action = (db.models as any).cessao
+    const action = (db.models as any).Cessao
       .create(cessao)
       .then(c => Object.assign(c, cessao));
 
@@ -108,7 +108,7 @@ const newInstallment = (db, siscofWrapper, mailer, emailTemplates, mailerConfig)
     historico.cessaoId = historico.id;
     delete historico.id;
 
-    return (db.models as any).cessaoHistorico.create(historico).then(() => {
+    return (db.models as any).CessaoHistorico.create(historico).then(() => {
       if (cessao.status === cessaoStatus.falha) {
         return Promise.reject(cessao.mensagemRetornoSiscof);
       }
@@ -126,8 +126,8 @@ const newInstallment = (db, siscofWrapper, mailer, emailTemplates, mailerConfig)
     });
 
     const create = Promise.all([
-      (db.models as any).cessaoRecebivel.bulkCreate(cessao.recebiveis),
-      (db.models as any).cessaoRecebivelHistorico.bulkCreate(cessao.recebiveis),
+      (db.models as any).CessaoRecebivel.bulkCreate(cessao.recebiveis),
+      (db.models as any).CessaoRecebivelHistorico.bulkCreate(cessao.recebiveis),
     ]);
 
     return create.then(() => cessao);
@@ -135,14 +135,14 @@ const newInstallment = (db, siscofWrapper, mailer, emailTemplates, mailerConfig)
 
   const enviarNotificacao = (cessao) => {
     const contatoInclude = () => ({
-      model: (db.models as any).participanteContato,
+      model: (db.models as any).ParticipanteContato,
       as: 'contatos',
       attributes: ['participanteId', 'email'],
       where: { ativo: true },
     });
 
     const participanteInclude = () => ({
-      model: (db.models as any).participante,
+      model: (db.models as any).Participante,
       as: 'participante',
       attributes: ['id', 'nome'],
       include: [contatoInclude()],
@@ -150,14 +150,14 @@ const newInstallment = (db, siscofWrapper, mailer, emailTemplates, mailerConfig)
     });
 
     return Promise.all([
-      (db.models as any).participanteFornecedor.findOne({
+      (db.models as any).ParticipanteFornecedor.findOne({
         where: {
           participanteId: cessao.participanteVinculo.participanteFornecedorId,
         },
         attributes: ['participanteId'],
         include: [participanteInclude()],
       }),
-      (db.models as any).participanteEstabelecimento.findOne({
+      (db.models as any).ParticipanteEstabelecimento.findOne({
         where: {
           participanteId:
             cessao.participanteVinculo.participanteEstabelecimentoId,

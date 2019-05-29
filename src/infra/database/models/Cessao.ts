@@ -72,7 +72,7 @@ export class Cessao extends Model<Cessao> {
   @AllowNull(false)
   @Is('cessaoTipoValidation', cessaoTipoValidation)
   @Default(cessaoTipo.cessao)
-  @Column(DataType.SMALLINT)
+  @Column(DataType.INTEGER)
   cessaoTipoId: number;
 
   @AllowNull(false)

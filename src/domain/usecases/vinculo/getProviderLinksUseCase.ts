@@ -50,7 +50,7 @@ const getProviderLinksUseCase = (db, siscofWrapper) => (
       whereVinculo.createdAt.$lte = dataFim;
     }
 
-    return (db.models as any).participanteVinculo.findAll({
+    return (db.models as any).ParticipanteVinculo.findAll({
       attributes: [
         'createdAt',
         'updatedAt',
@@ -66,21 +66,21 @@ const getProviderLinksUseCase = (db, siscofWrapper) => (
       ],
       include: [
         {
-          model: (db.models as any).motivoTipoRecusa,
+          model: (db.models as any).MotivoTipoRecusa,
           as: 'recusa',
           include: [{
-            model: (db.models as any).motivoRecusa,
+            model: (db.models as any).MotivoRecusa,
             as: 'motivoRecusa',
             attributes: ['id', 'descricao', 'requerObservacao'],
           }],
           required: false,
         },
         {
-          model: (db.models as any).participanteEstabelecimento,
+          model: (db.models as any).ParticipanteEstabelecimento,
           as: 'estabelecimento',
           attributes: ['participanteId'],
           include: [{
-            model: (db.models as any).participante,
+            model: (db.models as any).Participante,
             as: 'participante',
             attributes: ['id', 'nome', 'documento'],
             where: whereParticipante,

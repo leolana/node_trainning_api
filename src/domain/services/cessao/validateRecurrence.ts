@@ -53,7 +53,7 @@ const validateRecurrence = db => async (
         throw new Exceptions.ExpirationDateUnderThirtyDaysException();
       }
 
-      const recorrentes = await (db.models as any).participanteVinculoRecorrente
+      const recorrentes = await (db.models as any).ParticipanteVinculoRecorrente
         .create({
           valorMaximo,
           dataFinalVigencia,

@@ -1,6 +1,6 @@
 
 // tslint:disable:no-magic-numbers
-import { Table, Model, Column, DataType, AllowNull, } from 'sequelize-typescript';
+import { Table, Model, Column, DataType, AllowNull, Default, } from 'sequelize-typescript';
 @Table({
   timestamps: true,
   tableName: 'cessaoRecebivel'
@@ -16,6 +16,7 @@ export class CessaoRecebivel extends Model<CessaoRecebivel> {
   transacaoId: number;
 
   @AllowNull(false)
+  @Default(false)
   @Column(DataType.BOOLEAN)
   cancelado: boolean;
 }

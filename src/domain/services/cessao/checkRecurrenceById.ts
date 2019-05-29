@@ -22,14 +22,14 @@ const checkRecurrenceById = db => (method, ...args) => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  return (db.models as any).participanteVinculo
+  return (db.models as any).ParticipanteVinculo
     .findOne({
       attributes: ['id'],
       where: filter,
       include: [
         {
           attributes: ['id', 'status', 'dataVencimento', 'dataExpiracao'],
-          model: (db.models as any).cessao,
+          model: (db.models as any).Cessao,
           as: 'cessoes',
           where: {
             tipo: cessaoTypeEnum.recorrenteAprovacaoAutomatica,
@@ -39,7 +39,7 @@ const checkRecurrenceById = db => (method, ...args) => {
         },
         {
           attributes: ['id', 'status', 'valorMaximo', 'dataFinalVigencia'],
-          model: (db.models as any).participanteVinculoRecorrente,
+          model: (db.models as any).ParticipanteVinculoRecorrente,
           as: 'recorrentes',
           where: {
             status: [participanteVinculoStatus.pendente, participanteVinculoStatus.aprovado],

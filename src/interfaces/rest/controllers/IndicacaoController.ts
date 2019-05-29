@@ -82,7 +82,6 @@ class ParticipantesController implements Controller {
     // ESTABELECIMENTO
     router.get(
       '/estabelecimento/indicacoes',
-      requireBackoffice,
       this.pesquisarIndicacoesEc,
     );
     router.get(

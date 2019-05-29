@@ -1,10 +1,9 @@
 // tslint:disable:no-magic-numbers
-import { Table, Model, Column, DataType, AllowNull, Default, Is, BelongsTo } from 'sequelize-typescript';
+import { Table, Model, Column, DataType, AllowNull, Default, Is } from 'sequelize-typescript';
 import cessaoTipo from '../../../domain/entities/cessaoTipo';
 import cessaoRecebivelStatus from '../../../domain/entities/cessaoRecebivelStatus';
 import cessaoDiluicaoPagamento from '../../../domain/entities/cessaoDiluicaoPagamento';
 import * as Exceptions from '../../../interfaces/rest/exceptions/ApiExceptions';
-import { Cessao } from './Cessao';
 @Table({
   timestamps: true,
   tableName: 'cessaoHistorico'
@@ -67,7 +66,7 @@ export class CessaoHistorico extends Model<CessaoHistorico> {
 
   @AllowNull(false)
   @Is('cessaoTipoValidation', cessaoTipoValidation)
-  @Column(DataType.SMALLINT)
+  @Column(DataType.INTEGER)
   cessaoTipoId: number;
 
   @AllowNull(false)
@@ -78,9 +77,6 @@ export class CessaoHistorico extends Model<CessaoHistorico> {
   @AllowNull(true)
   @Column(DataType.SMALLINT)
   numeroParcelas: number;
-
-  @BelongsTo(() => Cessao, 'cessaoId')
-  cessao: Cessao[];
 }
 
 function statusRecebivelValidation(value: number[]) {

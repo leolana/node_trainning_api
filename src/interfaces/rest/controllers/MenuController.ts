@@ -63,7 +63,7 @@ class MenuController implements Controller {
 
     if (ehBackoffice) {
       add(
-        (this.db.models as any).credenciamento.count({
+        (this.db.models as any).Credenciamento.count({
           where: { status: credenciamentoStatusEnum.pendente, ativo: true },
         }).then((amount) => {
           menu.bulletCredenciamentoPendente = amount;
@@ -71,7 +71,7 @@ class MenuController implements Controller {
       );
 
       add(
-        (this.db.models as any).participanteIndicacao.count({
+        (this.db.models as any).ParticipanteIndicacao.count({
           where: {
             canalEntrada: participateNominationSourceEnum.indicacaoPorFornecedor,
             status: participanteVinculoStatus.pendente,
@@ -82,7 +82,7 @@ class MenuController implements Controller {
       );
 
       add(
-        (this.db.models as any).participanteIndicacao.count({
+        (this.db.models as any).ParticipanteIndicacao.count({
           where: {
             canalEntrada: participateNominationSourceEnum.indicacaoPorEc,
             status: participanteVinculoStatus.pendente,
@@ -95,7 +95,7 @@ class MenuController implements Controller {
 
     if (ehEstabelecimento) {
       add(
-        (this.db.models as any).participanteVinculo.count({
+        (this.db.models as any).ParticipanteVinculo.count({
           where: {
             participanteEstabelecimentoId: +user.participante,
             status: participanteVinculoStatus.pendente,
@@ -108,7 +108,7 @@ class MenuController implements Controller {
 
     if (ehEstabelecimento || ehFornecedor) {
       add(
-        (this.db.models as any).participanteVinculo.findAll({
+        (this.db.models as any).ParticipanteVinculo.findAll({
           attributes: ['id'],
           where: {
             // Investigar o motivo de não aceitar essa sintaxe
@@ -118,7 +118,7 @@ class MenuController implements Controller {
             ] as any),
           },
           include: [{
-            model: (this.db.models as any).cessao,
+            model: (this.db.models as any).Cessao,
             as: 'cessoes',
             required: true,
             attributes: ['id'],

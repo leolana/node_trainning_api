@@ -84,12 +84,12 @@ class HealthController implements Controller {
 
   getStatusCessoes = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     return Promise.all([
-      (this.db.models as any).cessao.findAll({
+      (this.db.models as any).Cessao.findAll({
         limit: 1,
         attributes: ['createdAt'],
         order: [['createdAt', 'DESC']]
       }),
-      (this.db.models as any).cessao.count({})
+      (this.db.models as any).Cessao.count({})
     ])
       .then(results => res.send({
         result: true,
@@ -104,7 +104,7 @@ class HealthController implements Controller {
   }
 
   getMigrations = async (req: Request, res: Response, next: NextFunction) => {
-    const migrations = (this.db.models as any)._migration.findAll({
+    const migrations = (this.db.models as any).Migration.findAll({
       attributes: ['key', 'executedAt'],
       order: [['executedAt', 'DESC']]
     });

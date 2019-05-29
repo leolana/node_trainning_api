@@ -11,22 +11,22 @@ const getBondsUseCase = (db: Sequelize) => async (
 
   if (solicitadoEstabelecimento) {
     include.push({
-      model: (db.models as any).participanteFornecedor,
+      model: (db.models as any).ParticipanteFornecedor,
       as: 'fornecedor',
       attributes: ['participanteId'],
       include: [{
-        model: (db.models as any).participante,
+        model: (db.models as any).Participante,
         as: 'participante',
         attributes: ['id', 'nome', 'documento'],
       }],
     });
   } else {
     include.push({
-      model: (db.models as any).participanteEstabelecimento,
+      model: (db.models as any).ParticipanteEstabelecimento,
       as: 'estabelecimento',
       attributes: ['participanteId'],
       include: [{
-        model: (db.models as any).participante,
+        model: (db.models as any).Participante,
         as: 'participante',
         attributes: ['id', 'nome', 'documento'],
       }],
@@ -36,9 +36,9 @@ const getBondsUseCase = (db: Sequelize) => async (
   if (statusVinculo === participanteVinculoStatus.reprovado) {
     include.push({
       as: 'recusa',
-      model: (db.models as any).motivoTipoRecusa,
+      model: (db.models as any).MotivoTipoRecusa,
       include: [{
-        model: (db.models as any).motivoRecusa,
+        model: (db.models as any).MotivoRecusa,
         as: 'motivoRecusa',
         attributes: ['id', 'descricao', 'requerObservacao'],
         where: { ativo: true },
@@ -52,7 +52,7 @@ const getBondsUseCase = (db: Sequelize) => async (
     where: { participanteId: id },
     include: [{
       include,
-      model: (db.models as any).participanteVinculo,
+      model: (db.models as any).ParticipanteVinculo,
       as: 'vinculos',
       attributes: [
         'id',

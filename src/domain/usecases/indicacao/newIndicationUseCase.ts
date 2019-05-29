@@ -10,7 +10,7 @@ const newIndicationUseCase = db => (
   status
 ) => {
   const check = () => {
-    return (db.models as any).participanteIndicacao
+    return (db.models as any).ParticipanteIndicacao
       .count({
         where: {
           documento,
@@ -25,7 +25,7 @@ const newIndicationUseCase = db => (
   };
 
   const create = () => {
-    return (db.models as any).participanteIndicacao.create({
+    return (db.models as any).ParticipanteIndicacao.create({
       documento,
       nome,
       email,
